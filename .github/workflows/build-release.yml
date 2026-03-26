@@ -52,7 +52,9 @@ jobs:
         run: |
           wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x appimagetool-x86_64.AppImage
-          sudo mv appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
+          ./appimagetool-x86_64.AppImage --appimage-extract
+          sudo mv squashfs-root /opt/appimagetool
+          sudo ln -s /opt/appimagetool/AppRun /usr/local/bin/appimagetool
       
       - name: Create AppImage
         run: |
@@ -87,7 +89,7 @@ jobs:
           
           chmod +x AppDir/AppRun
           
-          ARCH=x86_64 appimagetool AppDir Journex-x86_64.AppImage
+          ARCH=x86_64 appimagetool --no-appstream AppDir Journex-x86_64.AppImage
       
       - name: Upload AppImage
         uses: actions/upload-artifact@v4
