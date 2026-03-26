@@ -1,0 +1,91 @@
+> Task :desktop:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :desktop:convertXmlValueResourcesForMain NO-SOURCE
+> Task :desktop:copyNonXmlValueResourcesForMain NO-SOURCE
+> Task :desktop:prepareComposeResourcesTaskForMain NO-SOURCE
+> Task :desktop:generateResourceAccessorsForMain SKIPPED
+> Task :desktop:generateActualResourceCollectorsForMain SKIPPED
+> Task :desktop:generateComposeResClass SKIPPED
+> Task :shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared:compileKotlinDesktop UP-TO-DATE
+> Task :shared:desktopProcessResources NO-SOURCE
+> Task :shared:desktopMainClasses UP-TO-DATE
+> Task :shared:desktopJar UP-TO-DATE
+
+> Task :desktop:compileKotlin FAILED
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:124:13 Unresolved reference 'EnhancedTaskHeader'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:126:49 Unresolved reference 'it'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:135:13 Unresolved reference 'AdvancedSearchFilterBar'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:137:61 Unresolved reference 'it'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:139:56 Unresolved reference 'it'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:142:55 Unresolved reference 'it'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:149:25 Unresolved reference 'EnhancedKanbanBoard'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:153:60 Unresolved reference 'it'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:154:48 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:154:54 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:155:65 Unresolved reference 'id'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:158:59 Unresolved reference 'it'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:163:25 Unresolved reference 'EnhancedListView'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:165:60 Unresolved reference 'it'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:166:48 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:166:54 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:167:65 Unresolved reference 'id'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:169:63 Unresolved reference 'it'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:173:25 Unresolved reference 'CalendarView'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:175:60 Unresolved reference 'it'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:179:25 Unresolved reference 'TimelineView'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:181:60 Unresolved reference 'it'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:185:25 Unresolved reference 'AnalyticsView'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:256:9 Unresolved reference 'ProjectManagementDialog'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:260:33 Cannot infer type for this parameter. Please specify it explicitly.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:328:21 Unresolved reference 'TaskStatsChip'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:334:21 Unresolved reference 'TaskStatsChip'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:340:21 Unresolved reference 'TaskStatsChip'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:421:17 Unresolved reference 'ViewTab'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:427:17 Unresolved reference 'ViewTab'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:433:17 Unresolved reference 'ViewTab'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:439:17 Unresolved reference 'ViewTab'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:445:17 Unresolved reference 'ViewTab'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:616:38 Syntax error: Expecting ')'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:636:25 Unresolved reference 'EnhancedFilterChip'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:656:25 Unresolved reference 'EnhancedFilterChip'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:667:29 Unresolved reference 'EnhancedFilterChip'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:776:9 Unresolved reference 'EnhancedKanbanColumn'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:790:9 Unresolved reference 'EnhancedKanbanColumn'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:804:9 Unresolved reference 'EnhancedKanbanColumn'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:915:21 Unresolved reference 'EnhancedTaskCard'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:1258:13 Unresolved reference 'EnhancedListItem'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:1261:57 Unresolved reference 'it'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:1655:13 Unresolved reference 'TimelineItem'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:1784:17 Unresolved reference 'ModernStatCard'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:1794:17 Unresolved reference 'ModernStatCard'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:1804:17 Unresolved reference 'ModernStatCard'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:1814:17 Unresolved reference 'ModernStatCard'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:1867:25 Unresolved reference 'StatusProgressBar'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:1874:25 Unresolved reference 'StatusProgressBar'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:1881:25 Unresolved reference 'StatusProgressBar'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:1927:29 Unresolved reference 'PriorityProgressBar'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:1982:29 Unresolved reference 'ProjectStatItem'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:2004:17 Unresolved reference 'InsightCard'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:2015:17 Unresolved reference 'InsightCard'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:2026:17 Unresolved reference 'InsightCard'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:2390:13 Unresolved reference 'QuickActionItem'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:2395:13 Unresolved reference 'QuickActionItem'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:2400:13 Unresolved reference 'QuickActionItem'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:2582:29 Unresolved reference 'ProjectManagementItem'.
+e: file:///home/zeroxv6/Downloads/backup/Documents/projects/Journaling/desktop/src/jvmMain/kotlin/com/zeroxv6/journaling/desktop/ui/screens/DesktopTaskManagementScreen.kt:2771:2 Syntax error: Expecting '}'.
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':desktop:compileKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 3s
+3 actionable tasks: 1 executed, 2 up-to-date
