@@ -20,3 +20,6 @@ keystore.properties
 *.jks
 *.keystore
 credentials.json
+
+# Website directory
+website/

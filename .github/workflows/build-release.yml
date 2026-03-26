@@ -52,6 +52,13 @@ jobs:
           java-version: '17'
           cache: 'gradle'
       
+      - name: Decode credentials.json
+        env:
+          CREDENTIALS_JSON: ${{ secrets.CREDENTIALS_JSON }}
+        run: |
+          mkdir -p desktop/src/jvmMain/resources
+          echo "$CREDENTIALS_JSON" > desktop/src/jvmMain/resources/credentials.json
+      
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       
@@ -140,6 +147,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: 'gradle'
+      
+      - name: Decode credentials.json
+        env:
+          CREDENTIALS_JSON: ${{ secrets.CREDENTIALS_JSON }}
+        run: |
+          New-Item -ItemType Directory -Force -Path desktop/src/jvmMain/resources
+          echo "$env:CREDENTIALS_JSON" | Out-File -FilePath desktop/src/jvmMain/resources/credentials.json -Encoding UTF8
       
       - name: Build Windows EXE
         run: ./gradlew :desktop:packageReleaseExe --parallel --build-cache
