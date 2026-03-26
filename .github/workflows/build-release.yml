@@ -70,14 +70,26 @@ jobs:
         run: |
           mkdir -p AppDir/usr/bin AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
           
-          cp -r desktop/build/compose/binaries/main-release/app/* AppDir/usr/bin/ 2>/dev/null || true
+          # Copy the entire Journex directory contents
+          if [ -d "desktop/build/compose/binaries/main-release/app/Journex" ]; then
+            cp -r desktop/build/compose/binaries/main-release/app/Journex/* AppDir/usr/bin/
+          else
+            cp -r desktop/build/compose/binaries/main-release/app/* AppDir/usr/bin/
+          fi
+          
+          # Find the actual executable
+          EXEC_NAME=$(find AppDir/usr/bin -maxdepth 2 -type f -name "Journex" -o -name "journex" | head -1)
+          if [ -z "$EXEC_NAME" ]; then
+            echo "Looking for bin/Journex..."
+            EXEC_NAME="Journex/bin/Journex"
+          fi
           
           cat > AppDir/journex.desktop << 'EOF'
           [Desktop Entry]
           Type=Application
           Name=Journex
           Comment=Journaling Application
-          Exec=journex
+          Exec=AppRun
           Icon=journex
           Categories=Office;Utility;
           Terminal=false
@@ -93,8 +105,18 @@ jobs:
           HERE=${SELF%/*}
           export PATH="${HERE}/usr/bin:${PATH}"
           export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH}"
-          cd "${HERE}/usr/bin"
-          exec ./Journex "$@"
+          
+          # Find and execute the Journex binary
+          if [ -f "${HERE}/usr/bin/Journex/bin/Journex" ]; then
+            cd "${HERE}/usr/bin/Journex/bin"
+            exec ./Journex "$@"
+          elif [ -f "${HERE}/usr/bin/bin/Journex" ]; then
+            cd "${HERE}/usr/bin/bin"
+            exec ./Journex "$@"
+          else
+            echo "Error: Journex executable not found"
+            exit 1
+          fi
           EOF
           
           chmod +x AppDir/AppRun
