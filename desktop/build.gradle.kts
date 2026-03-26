@@ -37,13 +37,17 @@ dependencies {
     implementation("com.google.api-client:google-api-client:2.7.0")
     implementation("com.google.oauth-client:google-oauth-client-jetty:1.36.0")
     implementation("com.google.http-client:google-http-client-gson:1.45.0")
-
-
 }
 
 compose.desktop {
     application {
         mainClass = "space.zeroxv6.journex.desktop.MainKt"
+        
+        jvmArgs += listOf(
+            "--add-exports", "java.base/sun.net.www.protocol.http=ALL-UNNAMED",
+            "--add-exports", "jdk.httpserver/com.sun.net.httpserver=ALL-UNNAMED",
+            "--add-modules", "jdk.httpserver"
+        )
         
         nativeDistributions {
             // All target formats: Windows (EXE, MSI), macOS (DMG, PKG), Linux (DEB, RPM)
