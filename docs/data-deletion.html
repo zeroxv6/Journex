@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Deletion Policy - Journex</title>
+  <title>Data Deletion - Journex</title>
   <style>
     * {
       margin: 0;
@@ -70,41 +70,17 @@
       font-size: 1.2rem;
     }
 
-    .steps {
-      background: #f9f9f9;
-      border-radius: 8px;
-      padding: 30px;
-      margin: 30px 0;
+    .warning {
+      background: #fff3e0;
+      border-left: 4px solid #ff9800;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 4px;
     }
 
-    .step {
-      margin-bottom: 25px;
-      padding-left: 40px;
-      position: relative;
-    }
-
-    .step-number {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 30px;
-      height: 30px;
-      background: #4caf50;
-      color: white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-    }
-
-    .step h3 {
-      margin-top: 0;
-      color: #1a1a1a;
-    }
-
-    .step p {
-      color: #666;
+    .warning strong {
+      color: #e65100;
+      font-size: 1.2rem;
     }
 
     .nav {
@@ -157,7 +133,7 @@
       text-decoration: underline;
     }
 
-    ul {
+    ul, ol {
       margin: 15px 0;
       padding-left: 30px;
     }
@@ -168,12 +144,63 @@
       color: #555;
     }
 
+    .step {
+      background: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 20px;
+      margin: 15px 0;
+    }
+
+    .step-number {
+      display: inline-block;
+      background: #4caf50;
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 30px;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .step h3 {
+      display: inline;
+      margin: 0;
+      font-size: 1.3rem;
+    }
+
+    .step p {
+      margin-top: 10px;
+      margin-left: 40px;
+    }
+
+    .step ul {
+      margin-left: 40px;
+    }
+
     code {
       background: #f5f5f5;
       padding: 2px 6px;
       border-radius: 3px;
       font-family: 'Courier New', monospace;
       font-size: 0.95em;
+    }
+
+    .last-updated {
+      font-size: 0.9rem;
+      color: #999;
+      margin-bottom: 2rem;
+    }
+
+    a {
+      color: #4caf50;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -192,87 +219,130 @@
 
   <div class="container">
     <div class="card">
-      <h1>Data Deletion Policy</h1>
+      <h1>Data Deletion Instructions</h1>
+      <p class="last-updated">Last Updated: March 27, 2026</p>
       
       <div class="highlight">
-        <strong>Important: We Do Not Store Your Data</strong>
-        <p style="margin-top: 10px;">Journex does not store any of your personal data on our servers. All your journal entries, notes, tasks, and other information remain exclusively on your device and, if you choose to enable sync, on your personal Google Drive account.</p>
+        <strong>We Don't Store Your Data</strong>
+        <p style="margin-top: 10px;">Journex does not store any of your data on our servers. All your journal entries, notes, tasks, and media files are stored locally on your device and, if you enable Google Drive sync, in your personal Google Drive account.</p>
       </div>
 
-      <h2>How Your Data is Stored</h2>
-      <p>Journex is designed with privacy as a core principle:</p>
+      <h2>Where Is My Data Stored?</h2>
+      <p>Your Journex data is stored in two places:</p>
       <ul>
-        <li><strong>Local Storage:</strong> All your data is stored locally on your device. We never transmit your personal information to our servers.</li>
-        <li><strong>Optional Google Drive Sync:</strong> If you enable Google Drive sync, your data is stored in <strong>your personal Google Drive account</strong>, not on Journex servers.</li>
-        <li><strong>No Third-Party Access:</strong> We do not have access to your Google Drive data. Only you control your information.</li>
-        <li><strong>End-to-End Control:</strong> You have complete ownership and control over all your data at all times.</li>
+        <li><strong>Locally on your device:</strong> All data is stored in the app's local database and file system</li>
+        <li><strong>Your personal Google Drive (optional):</strong> If you enable Google Drive sync, a backup copy is stored in your own Google Drive account</li>
       </ul>
+      <p><strong>Important:</strong> We (the Journex developers) do not have access to your data in either location. Your data never passes through our servers.</p>
 
       <h2>How to Delete Your Data</h2>
-      <p>Since we don't store your data on our servers, deleting your information is entirely within your control. Follow these simple steps:</p>
+      <p>Since we don't store your data, you have complete control over deletion. Follow these steps to completely remove all your Journex data:</p>
 
-      <div class="steps">
-        <div class="step">
-          <div class="step-number">1</div>
-          <h3>Delete Google Drive Sync Data (if enabled)</h3>
-          <p>If you enabled Google Drive sync:</p>
-          <ul>
-            <li>Open <a href="https://drive.google.com" target="_blank">Google Drive</a></li>
-            <li>Locate the <code>JournalAppBackup</code> or <code>JournalingAppMedia</code> folder</li>
-            <li>Right-click the folder and select "Move to trash"</li>
-            <li>Empty your Google Drive trash to permanently delete the data</li>
-          </ul>
-        </div>
-
-        <div class="step">
-          <div class="step-number">2</div>
-          <h3>Revoke App Access to Google Drive</h3>
-          <p>Remove Journex's access to your Google account:</p>
-          <ul>
-            <li>Go to your <a href="https://myaccount.google.com/security" target="_blank">Google Account Security settings</a></li>
-            <li>Navigate to "Third-party apps with account access"</li>
-            <li>Find "Journex" or "Journal App Desktop" in the list</li>
-            <li>Click "Remove Access"</li>
-          </ul>
-        </div>
-
-        <div class="step">
-          <div class="step-number">3</div>
-          <h3>Delete Local Data</h3>
-          <p>Remove all data stored on your device:</p>
-          <ul>
-            <li><strong>Android:</strong> Uninstall the app from your device. This will delete all local data including journals, notes, tasks, and settings.</li>
-            <li><strong>Desktop (Windows/Mac/Linux):</strong> Uninstall the application. All local data will be removed during uninstallation.</li>
-          </ul>
-        </div>
+      <div class="step">
+        <span class="step-number">1</span>
+        <h3>Delete Data from Google Drive (If Sync is Enabled)</h3>
+        <p>If you have enabled Google Drive sync, your data is backed up to your personal Google Drive. To delete it:</p>
+        <ul>
+          <li>Open <a href="https://drive.google.com" target="_blank">Google Drive</a> in your web browser</li>
+          <li>Look for a folder named <code>JournalAppBackup</code> or <code>JournalingAppMedia</code></li>
+          <li>Right-click the folder and select "Move to trash" or "Delete"</li>
+          <li>Empty your Google Drive trash to permanently delete the files</li>
+        </ul>
+        <p><strong>Note:</strong> If you haven't enabled Google Drive sync, you can skip this step.</p>
       </div>
 
-      <h2>Additional Information</h2>
+      <div class="step">
+        <span class="step-number">2</span>
+        <h3>Revoke Google Drive Access</h3>
+        <p>Remove Journex's permission to access your Google Drive:</p>
+        <ul>
+          <li>Go to your <a href="https://myaccount.google.com/permissions" target="_blank">Google Account Permissions</a> page</li>
+          <li>Or navigate to: Google Account → Security → "Third-party apps with account access"</li>
+          <li>Find "Journex" or "Journal App Desktop" in the list</li>
+          <li>Click on it and select "Remove Access"</li>
+        </ul>
+        <p>This ensures Journex can no longer access your Google Drive, even if you reinstall the app.</p>
+      </div>
+
+      <div class="step">
+        <span class="step-number">3</span>
+        <h3>Uninstall the App from Your Device</h3>
+        <p>Remove the app to delete all local data:</p>
+        
+        <h4 style="margin-top: 15px; margin-left: 40px;">Android:</h4>
+        <ul>
+          <li>Go to Settings → Apps → Journex</li>
+          <li>Tap "Uninstall"</li>
+          <li>Confirm the uninstallation</li>
+        </ul>
+        
+        <h4 style="margin-top: 15px; margin-left: 40px;">Desktop (Windows/Mac/Linux):</h4>
+        <ul>
+          <li><strong>Windows:</strong> Settings → Apps → Journex → Uninstall</li>
+          <li><strong>Mac:</strong> Drag Journex from Applications folder to Trash</li>
+          <li><strong>Linux:</strong> Use your package manager to remove the app</li>
+        </ul>
+        
+        <p>Uninstalling the app will delete all local data including:</p>
+        <ul>
+          <li>Journal entries and notes</li>
+          <li>Tasks, schedules, and reminders</li>
+          <li>Templates and prompts</li>
+          <li>Photos, voice recordings, and drawings</li>
+          <li>App settings and preferences</li>
+        </ul>
+      </div>
+
+      <div class="warning">
+        <strong>⚠️ Data Deletion is Permanent</strong>
+        <p style="margin-top: 10px;">Once you delete your data from your device and Google Drive, it cannot be recovered. Make sure to export any important information before proceeding with deletion.</p>
+      </div>
+
+      <h2>Exporting Your Data Before Deletion</h2>
+      <p>If you want to keep a copy of your data before deleting it, Journex allows you to export your information:</p>
+      <ul>
+        <li><strong>PDF Export:</strong> Export individual journal entries or notes as PDF files</li>
+        <li><strong>Markdown Export:</strong> Export your content in Markdown format for use in other apps</li>
+        <li><strong>JSON Export:</strong> Export all your data in JSON format for complete backup</li>
+      </ul>
+      <p>To export your data, open the app and go to Settings → Export Data before uninstalling.</p>
+
+      <h2>What Happens After Deletion?</h2>
+      <p>After completing the steps above:</p>
+      <ul>
+        <li>All your local data is permanently removed from your device</li>
+        <li>Your Google Drive backup (if any) is deleted from your account</li>
+        <li>Journex no longer has permission to access your Google Drive</li>
+        <li>No trace of your data remains on Journex servers (because we never stored it)</li>
+      </ul>
+
+      <h2>Frequently Asked Questions</h2>
       
-      <h3>What Data is Deleted?</h3>
-      <p>Following the steps above will permanently delete:</p>
+      <h3>Do I need to contact Journex to delete my data?</h3>
+      <p>No. Since we don't store your data on our servers, you don't need to contact us. Simply follow the steps above to delete your data from your device and Google Drive.</p>
+
+      <h3>What if I only want to delete some data, not everything?</h3>
+      <p>You can selectively delete individual journal entries, notes, or tasks within the app before uninstalling. Open the app, navigate to the item you want to delete, and use the delete option.</p>
+
+      <h3>Will deleting the app cancel my subscription?</h3>
+      <p>Journex is completely free with no subscriptions. There are no recurring charges or accounts to cancel.</p>
+
+      <h3>Can I reinstall the app later?</h3>
+      <p>Yes, you can reinstall Journex at any time. However, your previous data will not be recovered unless you kept a backup before deletion.</p>
+
+      <h3>What if I can't find the Google Drive folder?</h3>
+      <p>If you never enabled Google Drive sync, there won't be any folder to delete. In that case, simply skip Step 1 and proceed to Steps 2 and 3.</p>
+
+      <h2>Need Help?</h2>
+      <p>If you have questions about data deletion or need assistance:</p>
       <ul>
-        <li>All journal entries and notes</li>
-        <li>Tasks, schedules, and reminders</li>
-        <li>Templates and prompts</li>
-        <li>Media files (photos, voice recordings, drawings)</li>
-        <li>App settings and preferences</li>
-        <li>All sync data from Google Drive</li>
+        <li>Email: <a href="mailto:raman.mann.205@gmail.com">raman.mann.205@gmail.com</a></li>
+        <li>GitHub: <a href="https://github.com/zeroxv6/Journex/issues" target="_blank">Open an issue</a></li>
       </ul>
 
-      <h3>Data Retention</h3>
-      <p>Since Journex does not store your data on our servers, there is no data retention period on our end. Once you delete your local data and Google Drive files, your information is permanently removed and cannot be recovered.</p>
-
-      <h3>Questions or Concerns?</h3>
-      <p>If you have any questions about data deletion or privacy, please contact us:</p>
-      <ul>
-        <li>Email: <a href="mailto:support@journex.app">support@journex.app</a></li>
-        <li>GitHub: <a href="https://github.com/zeroxv6/journaling/issues" target="_blank">Open an issue</a></li>
-      </ul>
-
-      <div class="highlight" style="background: #fff3e0; border-left-color: #ff9800;">
-        <strong>Note:</strong>
-        <p style="margin-top: 10px;">Journex is open-source software. You can review our code at any time to verify that we do not collect or store your personal data. Visit our <a href="https://github.com/zeroxv6/journaling" target="_blank">GitHub repository</a> to inspect the source code.</p>
+      <div class="highlight" style="margin-top: 2rem;">
+        <strong>Your Data, Your Control</strong>
+        <p style="margin-top: 10px;">Journex is designed to give you complete control over your data. We believe your personal information should stay personal, which is why we never store it on our servers. You can delete your data at any time without needing our permission or assistance.</p>
       </div>
     </div>
   </div>
