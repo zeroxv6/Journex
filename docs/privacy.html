@@ -3,88 +3,274 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privacy Policy — Journex</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>Privacy Policy - Journex</title>
   <style>
-    :root {
-      --bg: #262624;
-      --fg: #F0EBE0;
-      --fg-dim: rgba(240,235,224,0.5);
-      --border: 1px solid rgba(240,235,224,0.12);
-      --font-display: 'Anton', sans-serif;
-      --font-mono: 'Space Mono', monospace;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      background: var(--bg);
-      color: var(--fg);
-      font-family: var(--font-mono);
-      line-height: 1.8;
-      padding: 4rem 2rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: #f5f5f5;
     }
+
     .container {
       max-width: 800px;
       margin: 0 auto;
+      padding: 40px 20px;
     }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 40px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
     h1 {
-      font-family: var(--font-display);
-      font-size: 3rem;
-      text-transform: uppercase;
-      margin-bottom: 2rem;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #1a1a1a;
     }
+
     h2 {
-      font-family: var(--font-display);
       font-size: 1.8rem;
-      text-transform: uppercase;
-      margin: 2.5rem 0 1rem;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      color: #2a2a2a;
     }
+
+    h3 {
+      font-size: 1.3rem;
+      margin-top: 1.5rem;
+      margin-bottom: 0.8rem;
+      color: #3a3a3a;
+    }
+
     p {
-      margin-bottom: 1.5rem;
-      color: var(--fg-dim);
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      color: #555;
     }
-    a {
-      color: var(--fg);
+
+    .highlight {
+      background: #e8f5e9;
+      border-left: 4px solid #4caf50;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+
+    .highlight strong {
+      color: #2e7d32;
+      font-size: 1.2rem;
+    }
+
+    .nav {
+      background: white;
+      padding: 20px 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 40px;
+    }
+
+    .nav-content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #1a1a1a;
+      text-decoration: none;
+    }
+
+    .nav-links a {
+      margin-left: 20px;
+      color: #666;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+
+    .nav-links a:hover {
+      color: #4caf50;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 30px 20px;
+      color: #999;
+      font-size: 0.9rem;
+    }
+
+    .footer a {
+      color: #4caf50;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
       text-decoration: underline;
     }
-    .back-link {
-      display: inline-block;
-      margin-bottom: 2rem;
-      text-decoration: none;
-      color: var(--fg-dim);
-      transition: color 0.15s;
+
+    ul {
+      margin: 15px 0;
+      padding-left: 30px;
     }
-    .back-link:hover {
-      color: var(--fg);
+
+    li {
+      margin-bottom: 10px;
+      font-size: 1.05rem;
+      color: #555;
+    }
+
+    code {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95em;
+    }
+
+    .last-updated {
+      font-size: 0.9rem;
+      color: #999;
+      margin-bottom: 2rem;
     }
   </style>
 </head>
 <body>
+  <nav class="nav">
+    <div class="nav-content">
+      <a href="index.html" class="nav-logo">Journex</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="data-deletion.html">Data Deletion</a>
+        <a href="terms.html">Terms</a>
+      </div>
+    </div>
+  </nav>
+
   <div class="container">
-    <a href="index.html" class="back-link">← Back to Home</a>
-    
-    <h1>Privacy Policy</h1>
-    
-    <p><strong>Last Updated:</strong> March 26, 2026</p>
-    
-    <h2>Data Collection</h2>
-    <p>Journex is designed with privacy in mind. All your data is stored locally on your device. We do not collect, transmit, or store any personal information on external servers.</p>
-    
-    <h2>Google Drive Sync (Optional)</h2>
-    <p>If you choose to enable Google Drive sync, your journal entries and notes are synced to your personal Google Drive account. We do not have access to your Google Drive data. The sync feature uses Google's OAuth 2.0 authentication, and you can revoke access at any time through your Google Account settings.</p>
-    
-    <h2>Analytics</h2>
-    <p>Journex does not use any analytics, tracking, or telemetry services. Your usage patterns and data remain completely private.</p>
-    
-    <h2>Third-Party Services</h2>
-    <p>The only third-party service Journex interacts with is Google Drive (if you enable sync). No other external services are used.</p>
-    
-    <h2>Open Source</h2>
-    <p>Journex is open source software. You can review the entire codebase at <a href="https://github.com/zeroxv6/Journex">github.com/zeroxv6/Journex</a> to verify our privacy claims.</p>
-    
-    <h2>Contact</h2>
-    <p>For privacy-related questions, please open an issue on our <a href="https://github.com/zeroxv6/Journex/issues">GitHub repository</a>.</p>
+    <div class="card">
+      <h1>Privacy Policy</h1>
+      <p class="last-updated">Last Updated: March 27, 2026</p>
+      
+      <div class="highlight">
+        <strong>Your Privacy is Our Priority</strong>
+        <p style="margin-top: 10px;">Journex is built with privacy at its core. We do not collect, store, or transmit your personal data to our servers. Your information stays on your device and, optionally, in your personal Google Drive.</p>
+      </div>
+
+      <h2>Data Collection</h2>
+      <p>Journex does not collect any personal data. We do not:</p>
+      <ul>
+        <li>Track your usage or behavior</li>
+        <li>Collect analytics or telemetry</li>
+        <li>Store your journal entries, notes, or tasks on our servers</li>
+        <li>Access your personal information</li>
+        <li>Use cookies or tracking technologies</li>
+        <li>Share your data with third parties</li>
+      </ul>
+
+      <h2>Data Storage</h2>
+      
+      <h3>Local Storage</h3>
+      <p>All your data is stored locally on your device:</p>
+      <ul>
+        <li>Journal entries and notes</li>
+        <li>Tasks, schedules, and reminders</li>
+        <li>Templates and prompts</li>
+        <li>Media files (photos, voice recordings, drawings)</li>
+        <li>App settings and preferences</li>
+      </ul>
+      <p>This data remains on your device and is never transmitted to Journex servers.</p>
+
+      <h3>Google Drive Sync (Optional)</h3>
+      <p>If you choose to enable Google Drive sync:</p>
+      <ul>
+        <li>Your data is stored in <strong>your personal Google Drive account</strong></li>
+        <li>We do not have access to your Google Drive data</li>
+        <li>The sync feature uses Google's official APIs with your explicit permission</li>
+        <li>You can revoke access at any time through your Google Account settings</li>
+        <li>Data is encrypted during transmission using Google's secure protocols</li>
+      </ul>
+
+      <h2>Third-Party Services</h2>
+      
+      <h3>Google Drive API</h3>
+      <p>When you enable Google Drive sync, Journex uses the Google Drive API to:</p>
+      <ul>
+        <li>Upload your journal data to your personal Google Drive</li>
+        <li>Download your data for synchronization across devices</li>
+        <li>Manage backup files in your Google Drive</li>
+      </ul>
+      <p>This connection is established directly between your device and Google's servers. Journex does not act as an intermediary and cannot access your Google Drive data.</p>
+      <p>Google's privacy policy applies to data stored in your Google Drive: <a href="https://policies.google.com/privacy" target="_blank">https://policies.google.com/privacy</a></p>
+
+      <h2>Data Security</h2>
+      <p>We take security seriously:</p>
+      <ul>
+        <li><strong>Local Encryption:</strong> You can enable PIN lock or biometric authentication to protect your data on your device</li>
+        <li><strong>No Server Storage:</strong> Since we don't store your data on our servers, there's no risk of server breaches</li>
+        <li><strong>Open Source:</strong> Our code is publicly available for security audits and transparency</li>
+        <li><strong>Secure Transmission:</strong> When using Google Drive sync, data is transmitted using HTTPS encryption</li>
+      </ul>
+
+      <h2>Your Rights</h2>
+      <p>Since we don't collect or store your data, you have complete control:</p>
+      <ul>
+        <li><strong>Data Ownership:</strong> You own all your data, always</li>
+        <li><strong>Data Portability:</strong> Export your data anytime in PDF, Markdown, or JSON format</li>
+        <li><strong>Data Deletion:</strong> Delete your data at any time by uninstalling the app or removing files from your Google Drive</li>
+        <li><strong>No Account Required:</strong> Use Journex without creating an account or providing personal information</li>
+      </ul>
+
+      <h2>Children's Privacy</h2>
+      <p>Journex does not knowingly collect data from anyone, including children under 13. Since we don't collect any personal information, the app can be used by anyone without privacy concerns.</p>
+
+      <h2>Open Source Transparency</h2>
+      <p>Journex is open source software released under the GPL v3 license. You can:</p>
+      <ul>
+        <li>Review the source code at <a href="https://github.com/zeroxv6/Journex" target="_blank">github.com/zeroxv6/Journex</a></li>
+        <li>Verify that we don't collect or transmit your data</li>
+        <li>Audit the security and privacy features</li>
+        <li>Build and run your own version of the app</li>
+      </ul>
+
+      <h2>Changes to This Policy</h2>
+      <p>If we make changes to this privacy policy, we will update the "Last Updated" date at the top of this page. Since Journex is open source, you can review all changes in our GitHub repository.</p>
+
+      <h2>Contact Us</h2>
+      <p>If you have questions about this privacy policy or Journex's privacy practices:</p>
+      <ul>
+        <li>Email: <a href="mailto:support@journex.app">support@journex.app</a></li>
+        <li>GitHub: <a href="https://github.com/zeroxv6/Journex/issues" target="_blank">Open an issue</a></li>
+      </ul>
+
+      <div class="highlight" style="background: #fff3e0; border-left-color: #ff9800; margin-top: 2rem;">
+        <strong>Remember:</strong>
+        <p style="margin-top: 10px;">Journex is designed to keep your data private and secure. We never see your journal entries, notes, or personal information. Your privacy is not just a policy — it's built into the architecture of the app.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>&copy; 2026 Journex. Released under the MIT License.</p>
+    <p>
+      <a href="index.html">Home</a> | 
+      <a href="privacy.html">Privacy Policy</a> | 
+      <a href="data-deletion.html">Data Deletion</a> | 
+      <a href="terms.html">Terms</a> | 
+      <a href="https://github.com/zeroxv6/Journex" target="_blank">GitHub</a>
+    </p>
   </div>
 </body>
 </html>

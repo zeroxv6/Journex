@@ -1991,6 +1991,7 @@
     <div class="f-link-group">
       <span class="f-link-title">Legal</span>
       <a href="privacy.html">Privacy</a>
+      <a href="data-deletion.html">Data Deletion</a>
       <a href="terms.html">Terms</a>
       <a href="https://github.com/zeroxv6/Journex/blob/main/LICENSE">License</a>
     </div>
@@ -2018,9 +2019,10 @@
 
   // Download Modal Functions
   const DOWNLOAD_LINKS = {
-    linux: 'https://github.com/zeroxv6/Journex/releases/download/v1.0.6/Journex-x86_64.AppImage',
-    windows: 'https://github.com/zeroxv6/Journex/releases/download/v1.0.6/Journex-1.0.0.exe',
-    apk: 'https://github.com/zeroxv6/Journex/releases/download/v1.0.6/app-release-unsigned.apk'
+    // Use 'latest' to always get the newest release
+    linux: 'https://github.com/zeroxv6/Journex/releases/latest/download/Journex-x86_64.AppImage',
+    windows: 'https://github.com/zeroxv6/Journex/releases/latest/download/Journex.exe',
+    apk: 'https://github.com/zeroxv6/Journex/releases/latest/download/app-release-unsigned.apk'
   };
 
   function showDownloadModal() {
