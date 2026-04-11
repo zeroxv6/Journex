@@ -36,6 +36,7 @@ kotlin {
         
         val desktopMain by getting {
             dependencies {
+
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
             }
         }
