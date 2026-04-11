@@ -90,7 +90,7 @@ fun DrawingCanvas(
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = onCancel) {
-                        Text("Cancel")
+                        Text("Cancel", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     }
                     Button(
                         onClick = {
@@ -136,7 +136,7 @@ fun DrawingCanvas(
                         },
                         enabled = paths.isNotEmpty()
                     ) {
-                        Text("Save")
+                        Text("Save", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     }
                 }
             }
@@ -172,7 +172,7 @@ fun DrawingCanvas(
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .padding(16.dp)
             ) {
-                Text("Stroke Width: ${currentStrokeWidth.toInt()}px")
+                Text("Stroke Width: ${currentStrokeWidth.toInt()}px", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 Slider(
                     value = currentStrokeWidth,
                     onValueChange = { currentStrokeWidth = it },

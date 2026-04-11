@@ -26,43 +26,18 @@ object AlarmScheduler {
             }
         }
         alarmManager.cancel(pendingIntent)
-        when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-                if (alarmManager.canScheduleExactAlarms()) {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        calendar.timeInMillis,
-                        pendingIntent
-                    )
-                } else {
-                    alarmManager.setAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        calendar.timeInMillis,
-                        pendingIntent
-                    )
-                }
-            }
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    calendar.timeInMillis,
-                    pendingIntent
-                )
-            }
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> {
-                alarmManager.setExact(
-                    AlarmManager.RTC_WAKEUP,
-                    calendar.timeInMillis,
-                    pendingIntent
-                )
-            }
-            else -> {
-                alarmManager.set(
-                    AlarmManager.RTC_WAKEUP,
-                    calendar.timeInMillis,
-                    pendingIntent
-                )
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                pendingIntent
+            )
+        } else {
+            alarmManager.set(
+                AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                pendingIntent
+            )
         }
     }
     fun cancelJournalReminder(context: Context) {
@@ -76,12 +51,13 @@ object AlarmScheduler {
         )
         alarmManager.cancel(pendingIntent)
     }
-    fun scheduleTaskReminder(context: Context, reminderId: Int, title: String, message: String, timeInMillis: Long) {
+    fun scheduleTaskReminder(context: Context, reminderId: Int, title: String, message: String, timeInMillis: Long, repeatType: String = "NONE") {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, ReminderReceiver::class.java).apply {
             putExtra("title", title)
             putExtra("message", message)
             putExtra("notificationId", reminderId)
+            putExtra("repeatType", repeatType)
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
@@ -93,42 +69,76 @@ object AlarmScheduler {
         if (timeInMillis <= System.currentTimeMillis()) {
             return
         }
-        when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-                if (alarmManager.canScheduleExactAlarms()) {
-                    alarmManager.setExactAndAllowWhileIdle(
+        
+        // Handle recurring reminders
+        when (repeatType) {
+            "DAILY" -> {
+                // Use setRepeating for daily reminders
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setRepeating(
                         AlarmManager.RTC_WAKEUP,
                         timeInMillis,
+                        AlarmManager.INTERVAL_DAY,
                         pendingIntent
                     )
                 } else {
-                    alarmManager.setAndAllowWhileIdle(
+                    alarmManager.setRepeating(
                         AlarmManager.RTC_WAKEUP,
                         timeInMillis,
+                        AlarmManager.INTERVAL_DAY,
                         pendingIntent
                     )
                 }
             }
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    timeInMillis,
-                    pendingIntent
-                )
+            "WEEKLY" -> {
+                // Use setRepeating for weekly reminders (7 days)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setRepeating(
+                        AlarmManager.RTC_WAKEUP,
+                        timeInMillis,
+                        AlarmManager.INTERVAL_DAY * 7,
+                        pendingIntent
+                    )
+                } else {
+                    alarmManager.setRepeating(
+                        AlarmManager.RTC_WAKEUP,
+                        timeInMillis,
+                        AlarmManager.INTERVAL_DAY * 7,
+                        pendingIntent
+                    )
+                }
             }
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> {
-                alarmManager.setExact(
-                    AlarmManager.RTC_WAKEUP,
-                    timeInMillis,
-                    pendingIntent
-                )
+            "MONTHLY" -> {
+                // Use setRepeating for monthly reminders (30 days approximation)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setRepeating(
+                        AlarmManager.RTC_WAKEUP,
+                        timeInMillis,
+                        AlarmManager.INTERVAL_DAY * 30,
+                        pendingIntent
+                    )
+                } else {
+                    alarmManager.setRepeating(
+                        AlarmManager.RTC_WAKEUP,
+                        timeInMillis,
+                        AlarmManager.INTERVAL_DAY * 30,
+                        pendingIntent
+                    )
+                }
             }
             else -> {
-                alarmManager.set(
-                    AlarmManager.RTC_WAKEUP,
-                    timeInMillis,
-                    pendingIntent
-                )
+                // One-time reminder
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (alarmManager.canScheduleExactAlarms()) {
+                        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent)
+                    } else {
+                        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent)
+                    }
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent)
+                } else {
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent)
+                }
             }
         }
     }
@@ -221,43 +231,16 @@ object AlarmScheduler {
         if (timeInMillis <= System.currentTimeMillis()) {
             return
         }
-        when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-                if (alarmManager.canScheduleExactAlarms()) {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        timeInMillis,
-                        pendingIntent
-                    )
-                } else {
-                    alarmManager.setAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        timeInMillis,
-                        pendingIntent
-                    )
-                }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (alarmManager.canScheduleExactAlarms()) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent)
+            } else {
+                alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent)
             }
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    timeInMillis,
-                    pendingIntent
-                )
-            }
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> {
-                alarmManager.setExact(
-                    AlarmManager.RTC_WAKEUP,
-                    timeInMillis,
-                    pendingIntent
-                )
-            }
-            else -> {
-                alarmManager.set(
-                    AlarmManager.RTC_WAKEUP,
-                    timeInMillis,
-                    pendingIntent
-                )
-            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent)
+        } else {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent)
         }
     }
     fun cancelScheduleReminder(context: Context, scheduleId: String, daysOfWeek: String = "") {

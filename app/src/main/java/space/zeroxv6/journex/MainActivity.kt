@@ -3,6 +3,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +37,10 @@ import space.zeroxv6.journex.notification.NotificationPermissionHelper
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Enable edge-to-edge display
+        enableEdgeToEdge()
+        
         NotificationHelper.createNotificationChannels(this)
         if (!NotificationPermissionHelper.hasNotificationPermission(this)) {
             NotificationPermissionHelper.requestNotificationPermission(this)
@@ -61,7 +66,7 @@ fun JournalApp() {
         if (showPinLock) {
             Surface(
                 modifier = Modifier.fillMaxSize(),
-                color = Color.White
+                color = MaterialTheme.colorScheme.background
             ) {
                 PinLockScreen(
                     viewModel = viewModel,
@@ -73,7 +78,7 @@ fun JournalApp() {
             val navController = rememberNavController()
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
-            val screensWithoutNavBar = listOf("editor/{entryId}")
+            val screensWithoutNavBar = listOf("editor/{entryId}", "note-editor/{noteId}")
             val shouldShowNavBar = currentRoute !in screensWithoutNavBar
             Scaffold(
                 bottomBar = {
@@ -524,6 +529,7 @@ fun JournalApp() {
                     ) {
                         ScheduleScreen(
                             taskViewModel = taskViewModel,
+                            viewModel = viewModel,
                             onNavigateBack = {
                                 navController.popBackStack()
                             },
@@ -612,6 +618,7 @@ fun JournalApp() {
                     ) {
                         RemindersScreen(
                             taskViewModel = taskViewModel,
+                            viewModel = viewModel,
                             onNavigateBack = {
                                 navController.popBackStack()
                             },

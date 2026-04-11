@@ -77,7 +77,15 @@ private fun RowScope.BottomNavItem(
                     .size(24.dp)
             ) 
         },
-        label = { Text(label) },
+        label = { 
+            Text(
+                text = label,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                softWrap = false,
+                style = MaterialTheme.typography.labelSmall
+            ) 
+        },
         selected = selected,
         onClick = onClick,
         colors = NavigationBarItemDefaults.colors(
@@ -104,7 +112,15 @@ fun AppBottomNavBar(
     ) {
         NavigationBarItem(
             icon = { Icon(if (selectedTab == 0) Icons.Filled.Dashboard else Icons.Outlined.Dashboard, contentDescription = null) },
-            label = { Text("Dashboard") },
+            label = { 
+                Text(
+                    "Dashboard",
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    softWrap = false,
+                    style = MaterialTheme.typography.labelSmall
+                ) 
+            },
             selected = selectedTab == 0,
             onClick = {
                 onTabSelected(0)
@@ -120,7 +136,15 @@ fun AppBottomNavBar(
         )
         NavigationBarItem(
             icon = { Icon(if (selectedTab == 1) Icons.Filled.Article else Icons.Outlined.Article, contentDescription = null) },
-            label = { Text("Journal") },
+            label = { 
+                Text(
+                    "Journal",
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    softWrap = false,
+                    style = MaterialTheme.typography.labelSmall
+                ) 
+            },
             selected = selectedTab == 1,
             onClick = {
                 onTabSelected(1)
@@ -136,7 +160,15 @@ fun AppBottomNavBar(
         )
         NavigationBarItem(
             icon = { Icon(if (selectedTab == 2) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircleOutline, contentDescription = null) },
-            label = { Text("Tasks") },
+            label = { 
+                Text(
+                    "Tasks",
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    softWrap = false,
+                    style = MaterialTheme.typography.labelSmall
+                ) 
+            },
             selected = selectedTab == 2,
             onClick = {
                 onTabSelected(2)
@@ -152,7 +184,15 @@ fun AppBottomNavBar(
         )
         NavigationBarItem(
             icon = { Icon(if (selectedTab == 3) Icons.Filled.Notifications else Icons.Outlined.NotificationsNone, contentDescription = null) },
-            label = { Text("Reminders") },
+            label = { 
+                Text(
+                    "Reminders",
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    softWrap = false,
+                    style = MaterialTheme.typography.labelSmall
+                ) 
+            },
             selected = selectedTab == 3,
             onClick = {
                 onTabSelected(3)

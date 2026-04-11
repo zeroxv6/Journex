@@ -3,6 +3,7 @@ import space.zeroxv6.journex.data.ReminderDao
 import space.zeroxv6.journex.data.ReminderEntity
 import kotlinx.coroutines.flow.Flow
 class ReminderRepository(private val reminderDao: ReminderDao) {
+    fun getAllReminders(): Flow<List<ReminderEntity>> = reminderDao.getAllReminders()
     fun getActiveReminders(): Flow<List<ReminderEntity>> = reminderDao.getActiveReminders()
     fun getUpcomingReminders(limit: Int): Flow<List<ReminderEntity>> = reminderDao.getUpcomingReminders(limit)
     suspend fun insertReminder(reminder: ReminderEntity) = reminderDao.insertReminder(reminder)

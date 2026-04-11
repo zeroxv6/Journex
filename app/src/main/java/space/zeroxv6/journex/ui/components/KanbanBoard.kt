@@ -202,7 +202,7 @@ fun KanbanCard(
                         NoteStatus.entries.forEach { status ->
                             if (status != note.status) {
                                 DropdownMenuItem(
-                                    text = { Text(status.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                                    text = { Text(status.name.lowercase().replaceFirstChar { it.uppercase() }, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                     onClick = {
                                         onStatusChange(status)
                                         showStatusMenu = false

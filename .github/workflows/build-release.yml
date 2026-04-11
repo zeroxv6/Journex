@@ -31,7 +31,17 @@ jobs:
         run: chmod +x gradlew
       
       - name: Build Android APK
-        run: ./gradlew :app:assembleRelease --parallel --build-cache --configuration-cache
+        run: |
+          ./gradlew clean
+          ./gradlew :app:assembleRelease --stacktrace
+      
+      - name: Verify and rename APK
+        run: |
+          if [ -f app/build/outputs/apk/release/app-release-unsigned.apk ]; then
+            mv app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/app-release.apk
+          fi
+          ls -lh app/build/outputs/apk/release/app-release.apk
+          echo "APK size: $(du -h app/build/outputs/apk/release/app-release.apk | cut -f1)"
       
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
@@ -158,11 +168,20 @@ jobs:
       - name: Build Windows EXE
         run: ./gradlew :desktop:packageReleaseExe --parallel --build-cache
       
+      - name: Rename EXE to remove version
+        run: |
+          $exeFile = Get-ChildItem -Path desktop/build/compose/binaries/main-release -Filter "*.exe" -Recurse | Select-Object -First 1
+          if ($exeFile) {
+            $newPath = Join-Path $exeFile.DirectoryName "Journex.exe"
+            Move-Item -Path $exeFile.FullName -Destination $newPath -Force
+            Write-Host "Renamed to: Journex.exe"
+          }
+      
       - name: Upload Windows EXE
         uses: actions/upload-artifact@v4
         with:
           name: windows-exe
-          path: desktop/build/compose/binaries/main-release/**/*.exe
+          path: desktop/build/compose/binaries/main-release/**/Journex.exe
           retention-days: 7
 
   create-release:
@@ -172,6 +191,8 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+      
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
@@ -180,6 +201,37 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R artifacts/
       
+      - name: Create installation instructions
+        run: |
+          cat > INSTALLATION.txt << 'EOF'
+          JOURNEX - Installation Instructions
+          ====================================
+          
+          ANDROID (APK)
+          -------------
+          1. Enable "Install from unknown sources" in Android settings
+          2. Transfer the APK to your phone
+          3. Tap to install
+          
+          LINUX (AppImage)
+          ----------------
+          1. Make executable: chmod +x Journex-x86_64.AppImage
+          2. Run: ./Journex-x86_64.AppImage
+          3. If FUSE error: sudo apt install fuse (or pacman -S fuse2)
+          
+          WINDOWS (EXE)
+          -------------
+          1. Double-click Journex.exe
+          2. If Windows SmartScreen appears:
+             - Click "More info"
+             - Click "Run anyway"
+          3. This is normal for unsigned apps (code signing costs $300/year)
+          
+          The app is safe - it's open source and you can verify the code on GitHub.
+          
+          For detailed instructions, see: https://github.com/YOUR_USERNAME/journex
+          EOF
+      
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -187,6 +239,32 @@ jobs:
             artifacts/**/*.apk
             artifacts/**/*.AppImage
             artifacts/**/*.exe
+            INSTALLATION.txt
+          body: |
+            ## Installation Instructions
+            
+            ### Windows Users
+            When you run the .exe file, Windows SmartScreen will show a warning. This is normal for unsigned applications.
+            
+            **To install:**
+            1. Click "More info"
+            2. Click "Run anyway"
+            
+            This happens because code signing certificates cost $300/year. The app is safe and open source.
+            
+            ### Linux Users
+            Make the AppImage executable:
+            ```bash
+            chmod +x Journex-x86_64.AppImage
+            ./Journex-x86_64.AppImage
+            ```
+            
+            ### Android Users
+            Enable "Install from unknown sources" in your Android settings, then install the APK.
+            
+            ---
+            
+            See INSTALLATION.txt in the release assets for detailed instructions.
           draft: false
           prerelease: false
           generate_release_notes: true

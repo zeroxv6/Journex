@@ -3,7 +3,6 @@ import android.Manifest
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -39,7 +38,7 @@ private val PrimaryColor = Color(0xFF0A0A0A)
 private val SecondaryColor = Color(0xFF6B6B6B)
 private val TertiaryColor = Color(0xFF9E9E9E)
 private val BorderColor = Color(0xFFE8E8E8)
-private val DividerColor = Color(0xFFF0F0F0)
+private val DividerColorr = Color(0xFFF0F0F0)
 private val AccentColor = Color(0xFF1F1F1F)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
@@ -151,15 +150,7 @@ fun NoteEditorScreen(
                                     onDismissRequest = { showMoreMenu = false }
                                 ) {
                                     DropdownMenuItem(
-                                        text = { Text("Version History") },
-                                        onClick = {
-                                            showVersionHistory = true
-                                            showMoreMenu = false
-                                        },
-                                        leadingIcon = { Icon(Icons.Outlined.History, null) }
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text("Export") },
+                                        text = { Text("Export", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                         onClick = {
                                             showExportMenu = true
                                             showMoreMenu = false
@@ -167,7 +158,7 @@ fun NoteEditorScreen(
                                         leadingIcon = { Icon(Icons.Outlined.Share, null) }
                                     )
                                     DropdownMenuItem(
-                                        text = { Text(if (note.isFavorite) "Remove from Favorites" else "Add to Favorites") },
+                                        text = { Text(if (note.isFavorite) "Remove from Favorites" else "Add to Favorites", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                         onClick = {
                                             viewModel.updateCurrentNote(note.copy(isFavorite = !note.isFavorite))
                                             showMoreMenu = false
@@ -196,10 +187,11 @@ fun NoteEditorScreen(
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
                             containerColor = SurfaceColor
-                        )
+                        ),
+                        windowInsets = WindowInsets(0, 0, 0, 0)
                     )
                     HorizontalDivider(
-                        color = DividerColor,
+                        color = DividerColorr,
                         thickness = 1.dp
                     )
                     FormattingToolbar(
@@ -219,7 +211,7 @@ fun NoteEditorScreen(
                         onTemplateClick = { showTemplateSelector = true }
                     )
                     HorizontalDivider(
-                        color = DividerColor,
+                        color = DividerColorr,
                         thickness = 1.dp
                     )
                 }
@@ -574,13 +566,13 @@ fun NoteEditorScreen(
                         containerColor = AccentColor
                     )
                 ) {
-                    Text("Save")
+                    Text("Save", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             dismissButton = {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = { showDiscardDialog = false }) {
-                        Text("Cancel", color = SecondaryColor)
+                        Text("Cancel", color = SecondaryColor, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     }
                     TextButton(
                         onClick = {
@@ -588,7 +580,7 @@ fun NoteEditorScreen(
                             onNavigateBack()
                         }
                     ) {
-                        Text("Discard", color = SecondaryColor)
+                        Text("Discard", color = SecondaryColor, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     }
                 }
             }
@@ -1024,7 +1016,7 @@ fun CategoryPickerDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close", color = SecondaryColor)
+                Text("Close", color = SecondaryColor, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
         }
     )
@@ -1085,7 +1077,7 @@ fun AddTagDialog(
                                     selected = false,
                                     onClick = { onAdd(tag) },
                                     enabled = true,
-                                    label = { Text("#$tag") },
+                                    label = { Text("#$tag", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                     colors = FilterChipDefaults.filterChipColors(
                                         containerColor = BackgroundColor,
                                         labelColor = SecondaryColor
@@ -1115,7 +1107,7 @@ fun AddTagDialog(
                     containerColor = AccentColor
                 )
             ) {
-                Text("Add")
+                Text("Add", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
         },
         dismissButton = {
@@ -1174,7 +1166,7 @@ fun AddChecklistDialog(
                     containerColor = AccentColor
                 )
             ) {
-                Text("Add")
+                Text("Add", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
         },
         dismissButton = {

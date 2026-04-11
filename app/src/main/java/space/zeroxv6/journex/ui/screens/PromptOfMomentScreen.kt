@@ -129,7 +129,7 @@ fun PromptOfMomentScreen(
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Start Writing")
+                        Text("Start Writing", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     }
                 }
             }
@@ -152,7 +152,7 @@ fun PromptOfMomentScreen(
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("New Prompt")
+                    Text("New Prompt", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
                 OutlinedButton(
                     onClick = onNavigateToAllPrompts,
@@ -168,7 +168,7 @@ fun PromptOfMomentScreen(
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Browse All")
+                    Text("Browse All", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))
@@ -199,7 +199,7 @@ fun PromptOfMomentScreen(
                     TextField(
                         value = responseText,
                         onValueChange = { responseText = it },
-                        placeholder = { Text("Write your thoughts...") },
+                        placeholder = { Text("Write your thoughts...", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp),
@@ -230,7 +230,7 @@ fun PromptOfMomentScreen(
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Save")
+                    Text("Save", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             dismissButton = {
@@ -240,7 +240,7 @@ fun PromptOfMomentScreen(
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Cancel")
+                    Text("Cancel", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,

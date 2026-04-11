@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import space.zeroxv6.journex.model.*
+import space.zeroxv6.journex.ui.theme.GeistFontFamily
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,8 +63,8 @@ fun AddTaskDialog(
                         value = title,
                         onValueChange = { title = it },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Task Title", fontSize = 14.sp) },
-                        placeholder = { Text("Enter task title...", fontSize = 14.sp) },
+                        label = { Text("Task Title", fontSize = 14.sp, fontFamily = GeistFontFamily) },
+                        placeholder = { Text("Enter task title...", fontSize = 14.sp, fontFamily = GeistFontFamily) },
                         shape = RoundedCornerShape(10.dp),
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
@@ -79,8 +80,8 @@ fun AddTaskDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(120.dp),
-                        label = { Text("Description", fontSize = 14.sp) },
-                        placeholder = { Text("Enter task description...", fontSize = 14.sp) },
+                        label = { Text("Description", fontSize = 14.sp, fontFamily = GeistFontFamily) },
+                        placeholder = { Text("Enter task description...", fontSize = 14.sp, fontFamily = GeistFontFamily) },
                         shape = RoundedCornerShape(10.dp),
                         maxLines = 5,
                         colors = OutlinedTextFieldDefaults.colors(
@@ -131,7 +132,7 @@ fun AddTaskDialog(
                                 value = tagInput,
                                 onValueChange = { tagInput = it },
                                 modifier = Modifier.weight(1f),
-                                placeholder = { Text("Add tag...", fontSize = 13.sp) },
+                                placeholder = { Text("Add tag...", fontSize = 13.sp, fontFamily = GeistFontFamily) },
                                 shape = RoundedCornerShape(8.dp),
                                 singleLine = true,
                                 trailingIcon = {
@@ -196,7 +197,7 @@ fun AddTaskDialog(
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(10.dp)
                         ) {
-                            Text("Cancel", fontSize = 14.sp)
+                            Text("Cancel", fontSize = 14.sp, fontFamily = GeistFontFamily)
                         }
                         Button(
                             onClick = {
@@ -211,7 +212,7 @@ fun AddTaskDialog(
                                 containerColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
-                            Text("Create", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                            Text("Create", fontSize = 14.sp, fontWeight = FontWeight.Medium, fontFamily = GeistFontFamily)
                         }
                     }
                 }
@@ -472,7 +473,7 @@ fun TaskDetailDialog(
                                     value = tagInput,
                                     onValueChange = { tagInput = it },
                                     modifier = Modifier.weight(1f),
-                                    placeholder = { Text("Add tag...", fontSize = 13.sp) },
+                                    placeholder = { Text("Add tag...", fontSize = 13.sp, fontFamily = GeistFontFamily) },
                                     shape = RoundedCornerShape(8.dp),
                                     singleLine = true,
                                     trailingIcon = {
@@ -570,7 +571,7 @@ fun TaskDetailDialog(
                                         modifier = Modifier
                                             .weight(1f)
                                             .height(80.dp),
-                                        placeholder = { Text("Write a comment...", fontSize = 13.sp) },
+                                        placeholder = { Text("Write a comment...", fontSize = 13.sp, fontFamily = GeistFontFamily) },
                                         shape = RoundedCornerShape(8.dp),
                                         maxLines = 3
                                     )
@@ -654,7 +655,7 @@ fun TaskDetailDialog(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(10.dp)
                     ) {
-                        Text("Cancel", fontSize = 14.sp)
+                        Text("Cancel", fontSize = 14.sp, fontFamily = GeistFontFamily)
                     }
                     Button(
                         onClick = {
@@ -670,7 +671,7 @@ fun TaskDetailDialog(
                             containerColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
-                        Text("Save Changes", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                        Text("Save Changes", fontSize = 14.sp, fontWeight = FontWeight.Medium, fontFamily = GeistFontFamily)
                     }
                 }
             }
@@ -680,7 +681,7 @@ fun TaskDetailDialog(
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
             title = { Text("Delete Task?", fontWeight = FontWeight.SemiBold) },
-            text = { Text("This action cannot be undone.", fontSize = 14.sp) },
+            text = { Text("This action cannot be undone.", fontSize = 14.sp, fontFamily = GeistFontFamily) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -691,12 +692,12 @@ fun TaskDetailDialog(
                         containerColor = Color(0xFFF44336)
                     )
                 ) {
-                    Text("Delete")
+                    Text("Delete", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text("Cancel")
+                    Text("Cancel", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             }
         )

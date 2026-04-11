@@ -71,7 +71,7 @@ class QuickNoteNotificationService : Service() {
             .addRemoteInput(remoteInput)
             .build()
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification)
+            .setSmallIcon(R.drawable.journex)
             .setContentTitle("Quick Note")
             .setContentText("Tap 'Save Note' button below to add a note")
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -79,6 +79,7 @@ class QuickNoteNotificationService : Service() {
             .addAction(saveAction)
             .setStyle(NotificationCompat.BigTextStyle()
                 .bigText("Tap the 'Save Note' button below, type your note in the text field, and send"))
+            .setColor(0xFFFFE8DC.toInt())
             .build()
     }
 }

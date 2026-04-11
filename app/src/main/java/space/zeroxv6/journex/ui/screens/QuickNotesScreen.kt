@@ -19,10 +19,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import space.zeroxv6.journex.data.AppDatabase
 import space.zeroxv6.journex.data.QuickNoteEntity
 import space.zeroxv6.journex.repository.QuickNoteRepository
-import space.zeroxv6.journex.ui.animations.bounceClick
+import space.zeroxv6.journex.ui.theme.FeatureColors
 import space.zeroxv6.journex.viewmodel.JournalViewModel
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -59,21 +60,22 @@ fun QuickNotesScreen(
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface
-                    )
+                    ),
+                    windowInsets = WindowInsets(0, 0, 0, 0)
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
             }
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { showAddDialog = true },
-                containerColor = MaterialTheme.colorScheme.onSurface,
-                contentColor = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(16.dp)
-            ) {
+                ExtendedFloatingActionButton(
+                    onClick = { showAddDialog = true },
+                    containerColor = FeatureColors.QuickNotesAccentDark,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    shape = RoundedCornerShape(16.dp)
+                ) {
                 Icon(Icons.Filled.Add, contentDescription = "Add Note")
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Quick Note")
+                Text("Quick Note", maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     ) { padding ->
@@ -94,13 +96,17 @@ fun QuickNotesScreen(
                 Spacer(modifier = Modifier.height(24.dp))
                 Text(
                     text = "No Quick Notes",
-                    style = MaterialTheme.typography.headlineSmall
+                    style = MaterialTheme.typography.headlineSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Capture fleeting thoughts instantly",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         } else {
@@ -115,15 +121,6 @@ fun QuickNotesScreen(
                     QuickNoteCard(
                         note = note,
                         onDelete = {
-                            scope.launch {
-                                repository.deleteQuickNote(note)
-                            }
-                        },
-                        onConvertToEntry = {
-                            viewModel.createNewEntry()
-                            viewModel.currentEntry?.let { entry ->
-                                viewModel.updateCurrentEntry(entry.copy(content = note.content))
-                            }
                             scope.launch {
                                 repository.deleteQuickNote(note)
                             }
@@ -149,7 +146,7 @@ fun QuickNotesScreen(
                 TextField(
                     value = noteInput,
                     onValueChange = { noteInput = it },
-                    placeholder = { Text("What's on your mind?") },
+                    placeholder = { Text("What's on your mind?", maxLines = 1, overflow = TextOverflow.Ellipsis) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(120.dp),
@@ -165,12 +162,13 @@ fun QuickNotesScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        if (noteInput.isNotEmpty()) {
+                        val trimmedInput = noteInput.trim()
+                        if (trimmedInput.isNotEmpty()) {
                             scope.launch {
                                 repository.insertQuickNote(
                                     QuickNoteEntity(
                                         id = java.util.UUID.randomUUID().toString(),
-                                        content = noteInput,
+                                        content = trimmedInput,
                                         createdAt = System.currentTimeMillis()
                                     )
                                 )
@@ -179,13 +177,14 @@ fun QuickNotesScreen(
                             showAddDialog = false
                         }
                     },
+                    enabled = noteInput.trim().isNotEmpty(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.onSurface,
                         contentColor = MaterialTheme.colorScheme.surface
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Save")
+                    Text("Save", maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             },
             dismissButton = {
@@ -198,7 +197,7 @@ fun QuickNotesScreen(
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Cancel")
+                    Text("Cancel", maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -209,8 +208,7 @@ fun QuickNotesScreen(
 @Composable
 fun QuickNoteCard(
     note: QuickNoteEntity,
-    onDelete: () -> Unit,
-    onConvertToEntry: () -> Unit
+    onDelete: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val createdAt = remember(note.createdAt) {
@@ -220,9 +218,10 @@ fun QuickNoteCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
+            containerColor = Color(0xFFFFFFFF)
         ),
-        elevation = CardDefaults.cardElevation(0.dp)
+        elevation = CardDefaults.cardElevation(0.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE5DED4))
     ) {
         Column(
             modifier = Modifier
@@ -236,7 +235,11 @@ fun QuickNoteCard(
             ) {
                 Text(
                     text = note.content,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        color = Color(0xFF2C2825),
+                        fontFamily = androidx.compose.ui.text.font.FontFamily.Serif,
+                        lineHeight = 24.sp
+                    ),
                     modifier = Modifier.weight(1f),
                     maxLines = 5,
                     overflow = TextOverflow.Ellipsis
@@ -257,16 +260,6 @@ fun QuickNoteCard(
                         onDismissRequest = { showMenu = false },
                         modifier = Modifier.background(MaterialTheme.colorScheme.surface)
                     ) {
-                        DropdownMenuItem(
-                            text = { Text("Convert to Entry", style = MaterialTheme.typography.bodyMedium) },
-                            onClick = {
-                                onConvertToEntry()
-                                showMenu = false
-                            },
-                            leadingIcon = {
-                                Icon(Icons.Outlined.Article, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
-                            }
-                        )
                         DropdownMenuItem(
                             text = { Text("Delete", style = MaterialTheme.typography.bodyMedium) },
                             onClick = {

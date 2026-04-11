@@ -54,7 +54,7 @@ compose.desktop {
             targetFormats(TargetFormat.AppImage,TargetFormat.Dmg, TargetFormat.Pkg, TargetFormat.Exe, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
 
             packageName = "Journex"
-            packageVersion = "1.0.0"
+            packageVersion = "1.0.7"
             
             description = "A beautiful journaling application with mood tracking, tasks, and more"
             vendor = "ZeroXV6"

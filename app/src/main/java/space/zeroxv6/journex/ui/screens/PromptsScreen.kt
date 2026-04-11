@@ -18,7 +18,9 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import space.zeroxv6.journex.ui.animations.bounceClick
+import space.zeroxv6.journex.ui.theme.FeatureColors
 import space.zeroxv6.journex.viewmodel.JournalViewModel
 import kotlin.random.Random
 data class WritingPrompt(
@@ -97,8 +99,8 @@ fun PromptsScreen(
                     actions = {
                         IconButton(onClick = { showSavedPrompts = !showSavedPrompts }) {
                             Icon(
-                                if (showSavedPrompts) Icons.Outlined.Lightbulb else Icons.Outlined.LibraryBooks,
-                                contentDescription = if (showSavedPrompts) "Browse prompts" else "My prompts"
+                                if (showSavedPrompts) Icons.Outlined.LibraryBooks else Icons.Outlined.Lightbulb,
+                                contentDescription = if (showSavedPrompts) "My prompts" else "Browse prompts"
                             )
                         }
                         if (!showSavedPrompts) {
@@ -109,7 +111,8 @@ fun PromptsScreen(
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface
-                    )
+                    ),
+                    windowInsets = WindowInsets(0, 0, 0, 0)
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
             }
@@ -141,6 +144,21 @@ fun PromptsScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                     )
+                    
+                    Spacer(modifier = Modifier.height(32.dp))
+                    
+                    Button(
+                        onClick = { showSavedPrompts = false }, // Switches to "Browse prompts"
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.surface
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth(0.7f).height(50.dp)
+                    ) {
+                        Text("Explore All Prompts", fontWeight = androidx.compose.ui.text.font.FontWeight.Medium, fontSize = 16.sp)
+                    }
+                    
                 }
             } else {
                 LazyColumn(
@@ -325,7 +343,7 @@ fun PromptsScreen(
                         TextField(
                             value = responseText,
                             onValueChange = { responseText = it },
-                            placeholder = { Text("Write your thoughts...") },
+                            placeholder = { Text("Write your thoughts...", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(200.dp),
@@ -365,7 +383,7 @@ fun PromptsScreen(
                         ),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Save")
+                        Text("Save", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     }
                 },
                 dismissButton = {
@@ -375,7 +393,7 @@ fun PromptsScreen(
                             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     ) {
-                        Text("Cancel")
+                        Text("Cancel", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     }
                 },
                 containerColor = MaterialTheme.colorScheme.surface,
@@ -500,7 +518,7 @@ fun SavedPromptCard(
                         modifier = Modifier.background(MaterialTheme.colorScheme.surface)
                     ) {
                         androidx.compose.material3.DropdownMenuItem(
-                            text = { Text("Edit", style = MaterialTheme.typography.bodyMedium) },
+                            text = { Text("Edit", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             onClick = {
                                 onEdit()
                                 showMenu = false
@@ -510,7 +528,7 @@ fun SavedPromptCard(
                             }
                         )
                         androidx.compose.material3.DropdownMenuItem(
-                            text = { Text("Delete", style = MaterialTheme.typography.bodyMedium) },
+                            text = { Text("Delete", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             onClick = {
                                 showMenu = false
                                 showDeleteDialog = true
@@ -575,7 +593,7 @@ fun SavedPromptCard(
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Delete")
+                    Text("Delete", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             dismissButton = {
@@ -585,7 +603,7 @@ fun SavedPromptCard(
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Cancel")
+                    Text("Cancel", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,

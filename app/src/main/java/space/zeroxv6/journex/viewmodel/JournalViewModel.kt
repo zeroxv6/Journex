@@ -13,6 +13,7 @@ import space.zeroxv6.journex.model.*
 import space.zeroxv6.journex.notification.AlarmScheduler
 import space.zeroxv6.journex.notification.NotificationHelper
 import space.zeroxv6.journex.notification.QuickNoteNotificationService
+import space.zeroxv6.journex.notification.ScheduleNotificationService
 import space.zeroxv6.journex.repository.SettingsRepository
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -68,6 +69,9 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
                     notificationsEnabled = it.notificationsEnabled
                     journalReminderEnabled = it.journalReminderEnabled
                     quickNoteNotificationEnabled = it.quickNoteNotificationEnabled
+                    persistentScheduleNotificationEnabled = it.persistentScheduleNotificationEnabled
+                    use24HourFormat = it.use24HourFormat
+                    useFullScreenAlarm = it.useFullScreenAlarm
                     journalReminderTime = java.time.LocalTime.of(it.journalReminderHour, it.journalReminderMinute)
                     if (journalReminderEnabled && notificationsEnabled) {
                         AlarmScheduler.scheduleJournalReminder(context, it.journalReminderHour, it.journalReminderMinute)
@@ -153,6 +157,42 @@ class JournalViewModel(application: Application) : AndroidViewModel(application)
             }
         }
     }
+    
+    var use24HourFormat by mutableStateOf(false)
+        private set
+    
+    fun updateUse24HourFormat(enabled: Boolean) {
+        use24HourFormat = enabled
+        viewModelScope.launch {
+            settingsRepository.updateUse24HourFormat(enabled)
+        }
+    }
+    
+    var persistentScheduleNotificationEnabled by mutableStateOf(false)
+        private set
+    
+    fun updatePersistentScheduleNotificationEnabled(enabled: Boolean) {
+        persistentScheduleNotificationEnabled = enabled
+        viewModelScope.launch {
+            settingsRepository.updatePersistentScheduleNotificationEnabled(enabled)
+            if (enabled) {
+                ScheduleNotificationService.start(context)
+            } else {
+                ScheduleNotificationService.stop(context)
+            }
+        }
+    }
+    
+    var useFullScreenAlarm by mutableStateOf(true)
+        private set
+        
+    fun updateUseFullScreenAlarm(enabled: Boolean) {
+        useFullScreenAlarm = enabled
+        viewModelScope.launch {
+            settingsRepository.updateUseFullScreenAlarm(enabled)
+        }
+    }
+    
     fun verifyPin(pin: String): Boolean {
         return pin == pinCode
     }

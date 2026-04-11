@@ -29,6 +29,22 @@ class SettingsRepository(private val settingsDao: SettingsDao) {
         ensureSettingsExist()
         settingsDao.updateQuickNoteNotificationEnabled(enabled)
     }
+    
+    suspend fun updateUse24HourFormat(enabled: Boolean) {
+        ensureSettingsExist()
+        settingsDao.updateUse24HourFormat(enabled)
+    }
+    
+    suspend fun updatePersistentScheduleNotificationEnabled(enabled: Boolean) {
+        ensureSettingsExist()
+        settingsDao.updatePersistentScheduleNotificationEnabled(enabled)
+    }
+    
+    suspend fun updateUseFullScreenAlarm(enabled: Boolean) {
+        ensureSettingsExist()
+        settingsDao.updateUseFullScreenAlarm(enabled)
+    }
+    
     private suspend fun ensureSettingsExist() {
         if (settingsDao.getSettingsOnce() == null) {
             settingsDao.insertSettings(SettingsEntity())

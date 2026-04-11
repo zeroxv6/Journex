@@ -9,5 +9,8 @@ data class SettingsEntity(
     val journalReminderEnabled: Boolean = false,
     val journalReminderHour: Int = 20,
     val journalReminderMinute: Int = 0,
-    val quickNoteNotificationEnabled: Boolean = false
+    val quickNoteNotificationEnabled: Boolean = false,
+    val use24HourFormat: Boolean = false,
+    val persistentScheduleNotificationEnabled: Boolean = false,
+    val useFullScreenAlarm: Boolean = true
 )

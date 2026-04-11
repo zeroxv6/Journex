@@ -13,32 +13,42 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import space.zeroxv6.journex.model.Reminder
 import space.zeroxv6.journex.model.ReminderCategory
 import space.zeroxv6.journex.model.RepeatType
-import space.zeroxv6.journex.ui.animations.bounceClick
+import space.zeroxv6.journex.ui.theme.FeatureColors
 import space.zeroxv6.journex.ui.utils.HapticFeedback
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import androidx.compose.foundation.border
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.scaleIn
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RemindersScreen(
     taskViewModel: space.zeroxv6.journex.viewmodel.TaskViewModel,
+    viewModel: space.zeroxv6.journex.viewmodel.JournalViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToDashboard: () -> Unit = {},
     onNavigateToJournal: () -> Unit = {},
     onNavigateToTodo: () -> Unit = {}
 ) {
     val reminders by taskViewModel.activeReminders.collectAsState()
+    val use24Hour = viewModel.use24HourFormat
     var showAddDialog by remember { mutableStateOf(false) }
     var titleInput by remember { mutableStateOf("") }
     var descriptionInput by remember { mutableStateOf("") }
@@ -68,16 +78,23 @@ fun RemindersScreen(
                         }
                     },
                     actions = {
-                        IconButton(onClick = { showUpcoming = !showUpcoming }) {
-                            Icon(
-                                if (showUpcoming) Icons.Filled.Upcoming else Icons.Filled.History,
-                                contentDescription = "Toggle view"
-                            )
+                        OutlinedButton(
+                            onClick = { showUpcoming = !showUpcoming },
+                            shape = RoundedCornerShape(20.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha=0.5f)),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                containerColor = if (!showUpcoming) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface,
+                                contentColor = MaterialTheme.colorScheme.onSurface
+                            ),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp)
+                        ) {
+                            Text(if (!showUpcoming) "View Active" else "View Completed", style = MaterialTheme.typography.labelLarge)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface
-                    )
+                    ),
+                    windowInsets = WindowInsets(0, 0, 0, 0)
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
             }
@@ -106,8 +123,8 @@ fun RemindersScreen(
                     HapticFeedback.perform(context, HapticFeedback.FeedbackType.MEDIUM)
                     showAddDialog = true 
                 },
-                containerColor = MaterialTheme.colorScheme.onSurface,
-                contentColor = MaterialTheme.colorScheme.surface,
+                containerColor = FeatureColors.RemindersAccentDark,
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .scale(scale)
@@ -124,10 +141,14 @@ fun RemindersScreen(
             ) {
                 Icon(Icons.Filled.Add, contentDescription = "Add Reminder")
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("New Reminder")
+                Text("New Reminder", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
         }
     ) { padding ->
+        val coroutineScope = rememberCoroutineScope()
+        var completingReminders by remember { mutableStateOf(setOf<String>()) }
+        val context = androidx.compose.ui.platform.LocalContext.current
+        
         if (reminders.isEmpty()) {
             Column(
                 modifier = Modifier
@@ -170,16 +191,33 @@ fun RemindersScreen(
                                 style = MaterialTheme.typography.titleMedium
                             )
                         }
-                        items(upcomingReminders) { reminder ->
-                            ReminderCard(
-                                reminder = reminder,
-                                onToggleComplete = {
-                                    taskViewModel.toggleReminderCompletion(reminder)
-                                },
-                                onDelete = {
-                                    taskViewModel.deleteReminder(reminder)
-                                }
-                            )
+                        items(upcomingReminders, key = { it.id }) { reminder ->
+                            AnimatedVisibility(
+                                visible = !completingReminders.contains(reminder.id),
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut(animationSpec = tween(500)) + shrinkVertically(animationSpec = tween(500, delayMillis = 400))
+                            ) {
+                                ReminderCard(
+                                    reminder = reminder,
+                                    isCompleting = completingReminders.contains(reminder.id),
+                                    onToggleComplete = {
+                                        if (!reminder.isCompleted && !completingReminders.contains(reminder.id)) {
+                                            completingReminders = completingReminders + reminder.id
+                                            HapticFeedback.perform(context, HapticFeedback.FeedbackType.STRONG)
+                                            coroutineScope.launch {
+                                                kotlinx.coroutines.delay(800)
+                                                taskViewModel.toggleReminderCompletion(reminder)
+                                                completingReminders = completingReminders - reminder.id
+                                            }
+                                        } else {
+                                            taskViewModel.toggleReminderCompletion(reminder)
+                                        }
+                                    },
+                                    onDelete = {
+                                        taskViewModel.deleteReminder(reminder)
+                                    }
+                                )
+                            }
                         }
                     }
                     if (pastReminders.isNotEmpty()) {
@@ -191,31 +229,44 @@ fun RemindersScreen(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
-                        items(pastReminders) { reminder ->
-                            ReminderCard(
-                                reminder = reminder,
-                                isOverdue = true,
-                                onToggleComplete = {
-                                    taskViewModel.toggleReminderCompletion(reminder)
-                                },
-                                onDelete = {
-                                    taskViewModel.deleteReminder(reminder)
-                                }
-                            )
+                        items(pastReminders, key = { it.id }) { reminder ->
+                            AnimatedVisibility(
+                                visible = !completingReminders.contains(reminder.id),
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut(animationSpec = tween(500)) + shrinkVertically(animationSpec = tween(500, delayMillis = 400))
+                            ) {
+                                ReminderCard(
+                                    reminder = reminder,
+                                    isOverdue = true,
+                                    isCompleting = completingReminders.contains(reminder.id),
+                                    onToggleComplete = {
+                                        if (!reminder.isCompleted && !completingReminders.contains(reminder.id)) {
+                                            completingReminders = completingReminders + reminder.id
+                                            HapticFeedback.perform(context, HapticFeedback.FeedbackType.STRONG)
+                                            coroutineScope.launch {
+                                                kotlinx.coroutines.delay(800)
+                                                taskViewModel.toggleReminderCompletion(reminder)
+                                                completingReminders = completingReminders - reminder.id
+                                            }
+                                        } else {
+                                            taskViewModel.toggleReminderCompletion(reminder)
+                                        }
+                                    },
+                                    onDelete = {
+                                        taskViewModel.deleteReminder(reminder)
+                                    }
+                                )
+                            }
                         }
                     }
+                    // Removed inline OutlinedButton
                 } else {
+                    // Removed inline OutlinedButton
                     if (completedReminders.isNotEmpty()) {
-                        item {
-                            Text(
-                                text = "Completed (${completedReminders.size})",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                            )
-                        }
-                        items(completedReminders) { reminder ->
+                        items(completedReminders, key = { it.id }) { reminder ->
                             ReminderCard(
                                 reminder = reminder,
+                                isCompleting = false,
                                 onToggleComplete = {
                                     taskViewModel.toggleReminderCompletion(reminder)
                                 },
@@ -261,7 +312,7 @@ fun RemindersScreen(
                     TextField(
                         value = titleInput,
                         onValueChange = { titleInput = it },
-                        placeholder = { Text("Title") },
+                        placeholder = { Text("Title", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         singleLine = true,
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -274,7 +325,7 @@ fun RemindersScreen(
                     TextField(
                         value = descriptionInput,
                         onValueChange = { descriptionInput = it },
-                        placeholder = { Text("Description (optional)") },
+                        placeholder = { Text("Description (optional)", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         modifier = Modifier.height(80.dp),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -294,11 +345,17 @@ fun RemindersScreen(
                                 FilterChip(
                                     selected = selectedCategory == category,
                                     onClick = { selectedCategory = category },
-                                    label = { Text(category.label, maxLines = 1) },
+                                    label = {
+                                        Text(
+                                            category.label, maxLines = 1,
+                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    },
                                     modifier = Modifier.weight(1f),
                                     colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.onSurface,
-                                        selectedLabelColor = MaterialTheme.colorScheme.surface
+                                        selectedContainerColor = Color(0xFF2C2825),
+                                        selectedLabelColor = Color.White
                                     )
                                 )
                             }
@@ -311,11 +368,17 @@ fun RemindersScreen(
                                 FilterChip(
                                     selected = selectedCategory == category,
                                     onClick = { selectedCategory = category },
-                                    label = { Text(category.label, maxLines = 1) },
+                                    label = {
+                                        Text(
+                                            category.label, maxLines = 1,
+                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    },
                                     modifier = Modifier.weight(1f),
                                     colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.onSurface,
-                                        selectedLabelColor = MaterialTheme.colorScheme.surface
+                                        selectedContainerColor = Color(0xFF2C2825),
+                                        selectedLabelColor = Color.White
                                     )
                                 )
                             }
@@ -324,62 +387,13 @@ fun RemindersScreen(
                     }
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("Time", style = MaterialTheme.typography.labelMedium)
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(8.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    IconButton(
-                                        onClick = { selectedHour = (selectedHour - 1 + 24) % 24 },
-                                        modifier = Modifier.size(28.dp)
-                                    ) {
-                                        Icon(Icons.Filled.Remove, contentDescription = null, modifier = Modifier.size(16.dp))
-                                    }
-                                    Text(String.format("%02d", selectedHour), style = MaterialTheme.typography.titleMedium)
-                                    IconButton(
-                                        onClick = { selectedHour = (selectedHour + 1) % 24 },
-                                        modifier = Modifier.size(28.dp)
-                                    ) {
-                                        Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                                    }
-                                }
-                            }
-                            Text(":")
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(8.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    IconButton(
-                                        onClick = { selectedMinute = (selectedMinute - 15 + 60) % 60 },
-                                        modifier = Modifier.size(28.dp)
-                                    ) {
-                                        Icon(Icons.Filled.Remove, contentDescription = null, modifier = Modifier.size(16.dp))
-                                    }
-                                    Text(String.format("%02d", selectedMinute), style = MaterialTheme.typography.titleMedium)
-                                    IconButton(
-                                        onClick = { selectedMinute = (selectedMinute + 15) % 60 },
-                                        modifier = Modifier.size(28.dp)
-                                    ) {
-                                        Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                                    }
-                                }
-                            }
-                        }
+                        space.zeroxv6.journex.ui.components.ImprovedTimePicker(
+                            hour = selectedHour,
+                            minute = selectedMinute,
+                            use24Hour = use24Hour,
+                            onHourChange = { selectedHour = it },
+                            onMinuteChange = { selectedMinute = it }
+                        )
                     }
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("Repeat", style = MaterialTheme.typography.labelMedium)
@@ -391,11 +405,11 @@ fun RemindersScreen(
                                 FilterChip(
                                     selected = selectedRepeat == repeat,
                                     onClick = { selectedRepeat = repeat },
-                                    label = { Text(repeat.label) },
+                                    label = { Text(repeat.label, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
                                     modifier = Modifier.weight(1f),
                                     colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.onSurface,
-                                        selectedLabelColor = MaterialTheme.colorScheme.surface
+                                        selectedContainerColor = Color(0xFF2C2825),
+                                        selectedLabelColor = Color.White
                                     )
                                 )
                             }
@@ -408,11 +422,11 @@ fun RemindersScreen(
                                 FilterChip(
                                     selected = selectedRepeat == repeat,
                                     onClick = { selectedRepeat = repeat },
-                                    label = { Text(repeat.label) },
+                                    label = { Text(repeat.label, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.fillMaxWidth()) },
                                     modifier = Modifier.weight(1f),
                                     colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.onSurface,
-                                        selectedLabelColor = MaterialTheme.colorScheme.surface
+                                        selectedContainerColor = Color(0xFF2C2825),
+                                        selectedLabelColor = Color.White
                                     )
                                 )
                             }
@@ -441,12 +455,12 @@ fun RemindersScreen(
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.onSurface,
-                        contentColor = MaterialTheme.colorScheme.surface
+                        containerColor = Color(0xFF2C2825),
+                        contentColor = Color.White
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Add")
+                    Text("Add", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             dismissButton = {
@@ -464,7 +478,7 @@ fun RemindersScreen(
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Cancel")
+                    Text("Cancel", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -476,151 +490,244 @@ fun RemindersScreen(
 fun ReminderCard(
     reminder: Reminder,
     isOverdue: Boolean = false,
+    isCompleting: Boolean = false,
     onToggleComplete: () -> Unit,
     onDelete: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val context = androidx.compose.ui.platform.LocalContext.current
+    val effectiveCompleted = reminder.isCompleted || isCompleting
     val alpha by animateFloatAsState(
-        targetValue = if (reminder.isCompleted) 0.6f else 1f,
-        animationSpec = tween(300),
-        label = "reminderAlpha"
+        targetValue = if (effectiveCompleted) 0.52f else 1f,
+        animationSpec = tween(380), label = "reminderAlpha"
     )
     val scale by animateFloatAsState(
-        targetValue = if (reminder.isCompleted) 0.98f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
+        targetValue = if (effectiveCompleted) 0.985f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
         label = "reminderScale"
     )
-    val backgroundColor by animateColorAsState(
-        targetValue = when {
-            reminder.isCompleted -> MaterialTheme.colorScheme.surfaceVariant
-            isOverdue -> MaterialTheme.colorScheme.errorContainer
-            else -> MaterialTheme.colorScheme.surfaceVariant
-        },
-        animationSpec = tween(300),
-        label = "reminderBg"
-    )
-    Card(
+
+    val accentColor = when {
+        effectiveCompleted -> Color(0xFF9A9892)
+        isOverdue          -> Color(0xFFC04040)
+        else               -> Color(0xFF3D7A5C)
+    }
+    // Single ambient tint — the whole card breathes the status color
+    val cardBg = when {
+        effectiveCompleted -> Color(0xFFF6F3EE)
+        isOverdue          -> Color(0xFFFFF9F9)
+        else               -> Color(0xFFF9FFFC)
+    }
+    val borderColor = when {
+        effectiveCompleted -> Color(0xFFE0DAD2)
+        isOverdue          -> Color(0xFFEDCFCF)
+        else               -> Color(0xFFCCE8D9)
+    }
+
+    // Parse time parts for the editorial split display
+    val hourStr   = reminder.dateTime.format(DateTimeFormatter.ofPattern("h"))
+    val minStr    = reminder.dateTime.format(DateTimeFormatter.ofPattern("mm"))
+    val amPmStr   = reminder.dateTime.format(DateTimeFormatter.ofPattern("a"))
+    val dateStr   = reminder.dateTime.format(DateTimeFormatter.ofPattern("EEE, MMM d"))
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .animateContentSize(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessMedium
-                )
-            )
-            .graphicsLayer {
-                this.alpha = alpha
-                scaleX = scale
-                scaleY = scale
-            },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = backgroundColor
-        ),
-        elevation = CardDefaults.cardElevation(0.dp)
+            .animateContentSize(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
+            .graphicsLayer { this.alpha = alpha; scaleX = scale; scaleY = scale }
+            .clip(RoundedCornerShape(22.dp))
+            .background(cardBg, RoundedCornerShape(22.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(22.dp))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 20.dp, vertical = 18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-            Row(
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+            // ── TIME block — the editorial hero ───────────────────────────
+            Column(
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.spacedBy(0.dp)
             ) {
-                Checkbox(
-                    checked = reminder.isCompleted,
-                    onCheckedChange = { 
-                        onToggleComplete()
-                        if (!reminder.isCompleted) {
-                            HapticFeedback.perform(context, HapticFeedback.FeedbackType.STRONG)
-                        }
-                    },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = MaterialTheme.colorScheme.onSurface,
-                        uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                    )
-                )
-                Column(modifier = Modifier.weight(1f)) {
+                // Category + repeat superscript
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     Text(
-                        text = reminder.title,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = if (reminder.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface
+                        text = amPmStr,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.2.sp,
+                        color = accentColor.copy(alpha = 0.6f)
                     )
-                    if (reminder.description.isNotEmpty()) {
-                        Text(
-                            text = reminder.description,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    Text(
+                        text = "·",
+                        fontSize = 9.sp,
+                        color = accentColor.copy(alpha = 0.3f)
+                    )
+                    Text(
+                        text = reminder.category.label.uppercase(),
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.2.sp,
+                        color = accentColor.copy(alpha = 0.6f)
+                    )
+                    if (reminder.repeatType != RepeatType.NONE) {
+                        Icon(
+                            Icons.Outlined.Repeat,
+                            contentDescription = null,
+                            modifier = Modifier.size(9.dp),
+                            tint = accentColor.copy(alpha = 0.5f)
                         )
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = MaterialTheme.colorScheme.secondaryContainer
-                        ) {
-                            Text(
-                                text = reminder.category.label,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = reminder.category.color
-                            )
-                        }
-                        Text(
-                            text = reminder.dateTime.format(DateTimeFormatter.ofPattern("MMM dd, h:mm a")),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (isOverdue) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
-                        if (reminder.repeatType != RepeatType.NONE) {
-                            Icon(
-                                Icons.Outlined.Repeat,
-                                contentDescription = "Repeating",
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                            )
-                        }
-                    }
+                }
+                // Giant H:MM display
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(
+                        text = hourStr,
+                        fontSize = 38.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-1.5).sp,
+                        color = if (effectiveCompleted) Color(0xFFB0ABA5) else accentColor,
+                        lineHeight = 38.sp,
+                        modifier = Modifier.alignByBaseline()
+                    )
+                    Text(
+                        text = ":",
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Light,
+                        color = accentColor.copy(alpha = 0.35f),
+                        modifier = Modifier.offset(y = (-4).dp),
+                        lineHeight = 30.sp
+                    )
+                    Text(
+                        text = minStr,
+                        fontSize = 38.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-1.5).sp,
+                        color = if (effectiveCompleted) Color(0xFFB0ABA5) else accentColor.copy(alpha = 0.75f),
+                        lineHeight = 38.sp,
+                        modifier = Modifier.alignByBaseline()
+                    )
+                }
+                // Date
+                Text(
+                    text = dateStr,
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (isOverdue && !reminder.isCompleted) Color(0xFFC04040) else accentColor.copy(alpha = 0.5f),
+                    letterSpacing = 0.2.sp
+                )
+                if (isOverdue && !reminder.isCompleted) {
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Text(
+                        text = "OVERDUE",
+                        fontSize = 8.5.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.5.sp,
+                        color = Color(0xFFC04040).copy(alpha = 0.7f)
+                    )
                 }
             }
-            Box {
-                IconButton(
-                    onClick = { showMenu = true },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        Icons.Outlined.MoreVert,
-                        contentDescription = "More",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+
+            // Thin separator
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(52.dp)
+                    .background(borderColor)
+            )
+
+            // ── Title + description ───────────────────────────────────────
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(
+                    text = reminder.title,
+                    fontSize = 15.sp,
+                    fontWeight = if (effectiveCompleted) FontWeight.Normal else FontWeight.SemiBold,
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Serif,
+                    color = if (effectiveCompleted) Color(0xFFA8A4A0) else Color(0xFF1A1714),
+                    textDecoration = if (effectiveCompleted) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
+                    lineHeight = 21.sp,
+                    maxLines = 2,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+                if (reminder.description.isNotEmpty()) {
+                    Text(
+                        text = reminder.description,
+                        fontSize = 12.sp,
+                        color = Color(0xFFC2BAB2),
+                        maxLines = 1,
+                        lineHeight = 16.sp,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                 }
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false },
-                    modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+            }
+
+            // ── Right column: toggle + menu ───────────────────────────────
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Circle toggle button
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(androidx.compose.foundation.shape.CircleShape)
+                        .background(
+                            color = if (effectiveCompleted) accentColor.copy(alpha = 0.88f) else Color.Transparent,
+                            shape = androidx.compose.foundation.shape.CircleShape
+                        )
+                        .border(
+                            width = 1.5.dp,
+                            color = if (effectiveCompleted) Color.Transparent else accentColor.copy(alpha = 0.4f),
+                            shape = androidx.compose.foundation.shape.CircleShape
+                        )
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                            onClick = onToggleComplete
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
-                    DropdownMenuItem(
-                        text = { Text("Delete", style = MaterialTheme.typography.bodyMedium) },
-                        onClick = {
-                            onDelete()
-                            showMenu = false
-                        },
-                        leadingIcon = {
-                            Icon(Icons.Outlined.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
-                        }
-                    )
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = effectiveCompleted,
+                        enter = androidx.compose.animation.scaleIn() + androidx.compose.animation.fadeIn(),
+                        exit = androidx.compose.animation.scaleOut() + androidx.compose.animation.fadeOut()
+                    ) {
+                        Icon(Icons.Filled.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                    }
+                }
+
+                // Menu icon
+                Box {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                            ) { showMenu = true },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Outlined.MoreVert, contentDescription = "More", tint = Color(0xFFCEC8C0), modifier = Modifier.size(28.dp))
+                    }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false },
+                        modifier = Modifier.background(Color(0xFFFFFDF9))
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Delete", style = MaterialTheme.typography.bodyMedium, color = Color(0xFF3A3630)) },
+                            onClick = { onDelete(); showMenu = false },
+                            leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null, tint = Color(0xFFC04040), modifier = Modifier.size(28.dp)) }
+                        )
+                    }
                 }
             }
         }
     }
 }
+

@@ -2,6 +2,7 @@ package space.zeroxv6.journex.ui.screens
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -25,10 +26,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import androidx.compose.ui.unit.sp
 import space.zeroxv6.journex.model.JournalEntry
 import space.zeroxv6.journex.model.Mood
-import space.zeroxv6.journex.ui.animations.bounceClick
 import space.zeroxv6.journex.ui.utils.HapticFeedback
 import space.zeroxv6.journex.viewmodel.JournalViewModel
 import space.zeroxv6.journex.viewmodel.SortOption
@@ -60,6 +60,13 @@ fun HomeScreen(
     val filteredEntries = viewModel.getFilteredEntries()
     val entriesByDate = filteredEntries.groupBy { it.createdAt.toLocalDate() }
     val today = LocalDate.now()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    
+    if (viewModel.showArchived) {
+        androidx.activity.compose.BackHandler {
+            viewModel.showArchived = false
+        }
+    }
     Scaffold(
         topBar = {
             Column {
@@ -67,7 +74,9 @@ fun HomeScreen(
                     title = {
                         Text(
                             text = if (viewModel.showArchived) "Archived" else "Journals",
-                            style = MaterialTheme.typography.headlineMedium
+                            style = MaterialTheme.typography.headlineMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     },
                     navigationIcon = {
@@ -102,7 +111,7 @@ fun HomeScreen(
                                 modifier = Modifier.background(MaterialTheme.colorScheme.surface)
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Quick Notes", style = MaterialTheme.typography.bodyMedium) },
+                                    text = { Text("Quick Notes", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                                     onClick = {
                                         onNavigateToQuickNotes()
                                         showMoreMenu = false
@@ -112,7 +121,7 @@ fun HomeScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Writing Prompts", style = MaterialTheme.typography.bodyMedium) },
+                                    text = { Text("Writing Prompts", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                                     onClick = {
                                         onNavigateToPrompts()
                                         showMoreMenu = false
@@ -122,7 +131,7 @@ fun HomeScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Templates", style = MaterialTheme.typography.bodyMedium) },
+                                    text = { Text("Templates", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                                     onClick = {
                                         onNavigateToTemplates()
                                         showMoreMenu = false
@@ -133,7 +142,7 @@ fun HomeScreen(
                                 )
                                 HorizontalDivider(color = MaterialTheme.colorScheme.outline)
                                 DropdownMenuItem(
-                                    text = { Text("Tasks", style = MaterialTheme.typography.bodyMedium) },
+                                    text = { Text("Tasks", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                                     onClick = {
                                         onNavigateToTodo()
                                         showMoreMenu = false
@@ -143,7 +152,7 @@ fun HomeScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Daily Schedule", style = MaterialTheme.typography.bodyMedium) },
+                                    text = { Text("Daily Schedule", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                                     onClick = {
                                         onNavigateToSchedule()
                                         showMoreMenu = false
@@ -153,7 +162,7 @@ fun HomeScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Reminders", style = MaterialTheme.typography.bodyMedium) },
+                                    text = { Text("Reminders", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                                     onClick = {
                                         onNavigateToReminders()
                                         showMoreMenu = false
@@ -162,9 +171,37 @@ fun HomeScreen(
                                         Icon(Icons.Outlined.NotificationsNone, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
                                     }
                                 )
+                                DropdownMenuItem(
+                                    text = { Text("Export Complete Journal", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                    onClick = {
+                                        showMoreMenu = false
+                                        val exportText = viewModel.getExportText()
+                                        val file = space.zeroxv6.journex.utils.ExportUtils.saveToFile(
+                                            context,
+                                            exportText,
+                                            "Journal_Export_${System.currentTimeMillis()}.txt"
+                                        )
+                                        val uri = androidx.core.content.FileProvider.getUriForFile(
+                                            context,
+                                            "${context.packageName}.fileprovider",
+                                            file
+                                        )
+                                        val shareIntent = android.content.Intent().apply {
+                                            action = android.content.Intent.ACTION_SEND
+                                            type = "text/plain"
+                                            putExtra(android.content.Intent.EXTRA_TITLE, "My Journal Export")
+                                            putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                                            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        }
+                                        context.startActivity(android.content.Intent.createChooser(shareIntent, "Export Complete Journal"))
+                                    },
+                                    leadingIcon = {
+                                        Icon(Icons.Outlined.Share, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+                                    }
+                                )
                                 HorizontalDivider(color = MaterialTheme.colorScheme.outline)
                                 DropdownMenuItem(
-                                    text = { Text("Settings", style = MaterialTheme.typography.bodyMedium) },
+                                    text = { Text("Settings", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                                     onClick = {
                                         onNavigateToSettings()
                                         showMoreMenu = false
@@ -182,7 +219,7 @@ fun HomeScreen(
                                     modifier = Modifier
                                         .weight(1f)
                                         .padding(horizontal = 8.dp),
-                                    placeholder = { Text("Search...") },
+                                    placeholder = { Text("Search...", maxLines = 1, overflow = TextOverflow.Ellipsis) },
                                     singleLine = true,
                                     colors = TextFieldDefaults.colors(
                                         focusedContainerColor = Color.Transparent,
@@ -202,7 +239,8 @@ fun HomeScreen(
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface
-                    )
+                    ),
+                    windowInsets = WindowInsets(0, 0, 0, 0)
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
             }
@@ -261,7 +299,7 @@ fun HomeScreen(
                     ) {
                         Icon(Icons.Filled.Add, contentDescription = "New Entry")
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("New Entry")
+                        Text("New Entry", maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }
@@ -285,13 +323,17 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
                         text = "No Archived Entries",
-                        style = MaterialTheme.typography.headlineSmall
+                        style = MaterialTheme.typography.headlineSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Archived entries will appear here",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             } else {
@@ -401,12 +443,16 @@ fun DailyEntrySection(
             Column {
                 Text(
                     text = if (isToday) "Today" else date.format(DateTimeFormatter.ofPattern("EEEE")),
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = date.format(DateTimeFormatter.ofPattern("MMMM dd, yyyy")),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             if (entries.isNotEmpty()) {
@@ -418,7 +464,9 @@ fun DailyEntrySection(
                         text = "${entries.size} ${if (entries.size == 1) "entry" else "entries"}",
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -510,7 +558,9 @@ fun ArchivedEntryCard(
                             text = { 
                                 Text(
                                     "Unarchive",
-                                    style = MaterialTheme.typography.bodyMedium
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 ) 
                             },
                             onClick = {
@@ -580,14 +630,18 @@ fun ArchivedEntryCard(
             title = { 
                 Text(
                     "Delete Entry",
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 ) 
             },
             text = { 
                 Text(
                     "Are you sure you want to permanently delete this entry?",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
                 ) 
             },
             confirmButton = {
@@ -602,7 +656,7 @@ fun ArchivedEntryCard(
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Delete")
+                    Text("Delete", maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             },
             dismissButton = {
@@ -612,7 +666,7 @@ fun ArchivedEntryCard(
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Cancel")
+                    Text("Cancel", maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -695,13 +749,17 @@ fun EmptyDayCard(
             Text(
                 text = if (isToday) "No entry for today" else "No entries",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             if (isToday && onNewEntryClick != null) {
                 Text(
                     text = "Tap to write your first entry",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline
+                    color = MaterialTheme.colorScheme.outline,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
@@ -729,18 +787,27 @@ fun JournalEntryCard(
         ),
         label = "cardScale"
     )
-    val elevation by animateDpAsState(
-        targetValue = if (isPressed) 0.dp else 2.dp,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
-        label = "cardElevation"
-    )
-    Card(
+
+    // ── Editorial color tokens ────────────────────────────────────────────
+    val CardBg     = Color(0xFFFFFDF9)
+    val CardBorder = Color(0xFFE5DED4)
+    val DateInk    = Color(0xFF2C2825)
+    val BodyInk    = Color(0xFF2C2825)
+    val MuteInk    = Color(0xFFA09892)
+    val AccentRust = Color(0xFFC05A28)
+    val PinAmber   = Color(0xFFD4920A)
+
+    val dayStr   = entry.createdAt.format(DateTimeFormatter.ofPattern("d"))
+    val monStr   = entry.createdAt.format(DateTimeFormatter.ofPattern("MMM")).uppercase()
+    val timeStr  = entry.createdAt.format(DateTimeFormatter.ofPattern("h:mm a"))
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .scale(scale)
+            .clip(RoundedCornerShape(14.dp))
+            .background(CardBg)
+            .border(1.dp, CardBorder, RoundedCornerShape(14.dp))
             .pointerInput(Unit) {
                 detectTapGestures(
                     onPress = {
@@ -748,10 +815,9 @@ fun JournalEntryCard(
                         val vibrator = context.getSystemService(android.content.Context.VIBRATOR_SERVICE) as? android.os.Vibrator
                         vibrator?.let {
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                it.vibrate(android.os.VibrationEffect.createOneShot(30, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+                                it.vibrate(android.os.VibrationEffect.createOneShot(22, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
                             } else {
-                                @Suppress("DEPRECATION")
-                                it.vibrate(30)
+                                @Suppress("DEPRECATION") it.vibrate(22)
                             }
                         }
                         tryAwaitRelease()
@@ -759,270 +825,203 @@ fun JournalEntryCard(
                     },
                     onTap = { onClick() }
                 )
-            },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        elevation = CardDefaults.cardElevation(elevation)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    if (entry.title.isNotEmpty()) {
-                        Text(
-                            text = entry.title,
-                            style = MaterialTheme.typography.titleLarge,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-                    Text(
-                        text = entry.content,
-                        style = MaterialTheme.typography.bodyMedium,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    if (entry.photos.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            entry.photos.take(3).forEach { photoUri ->
-                                AsyncImage(
-                                    model = if (photoUri.startsWith("/")) java.io.File(photoUri) else android.net.Uri.parse(photoUri),
-                                    contentDescription = "Entry photo",
-                                    modifier = Modifier
-                                        .size(60.dp)
-                                        .clip(RoundedCornerShape(8.dp)),
-                                    contentScale = ContentScale.Crop
-                                )
-                            }
-                            if (entry.photos.size > 3) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(60.dp)
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(MaterialTheme.colorScheme.secondaryContainer),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "+${entry.photos.size - 3}",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-                Box {
-                    IconButton(
-                        onClick = { showMenu = true },
-                        modifier = Modifier.size(40.dp)
-                    ) {
-                        Icon(
-                            Icons.Outlined.MoreVert,
-                            contentDescription = "More options",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false },
-                        modifier = Modifier.background(MaterialTheme.colorScheme.surface)
-                    ) {
-                        DropdownMenuItem(
-                            text = { 
-                                Text(
-                                    if (entry.isFavorite) "Remove from Favorites" else "Add to Favorites",
-                                    style = MaterialTheme.typography.bodyMedium
-                                ) 
-                            },
-                            onClick = {
-                                onFavoriteClick()
-                                showMenu = false
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    if (entry.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { 
-                                Text(
-                                    if (entry.isPinned) "Unpin" else "Pin to Top",
-                                    style = MaterialTheme.typography.bodyMedium
-                                ) 
-                            },
-                            onClick = {
-                                onPinClick()
-                                showMenu = false
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    if (entry.isPinned) Icons.Filled.PushPin else Icons.Outlined.PushPin,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { 
-                                Text(
-                                    "Archive",
-                                    style = MaterialTheme.typography.bodyMedium
-                                ) 
-                            },
-                            onClick = {
-                                onArchiveClick()
-                                showMenu = false
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Outlined.Archive,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { 
-                                Text(
-                                    "Duplicate",
-                                    style = MaterialTheme.typography.bodyMedium
-                                ) 
-                            },
-                            onClick = {
-                                onDuplicateClick()
-                                showMenu = false
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Outlined.ContentCopy,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outline)
-                        DropdownMenuItem(
-                            text = { 
-                                Text(
-                                    "Delete",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                ) 
-                            },
-                            onClick = {
-                                showMenu = false
-                                showDeleteDialog = true
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Outlined.Delete,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        )
-                    }
-                }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+    ) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+
+            // ── DATE COLUMN ───────────────────────────────────────────────
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier
+                    .width(64.dp)
+                    .padding(top = 20.dp, bottom = 20.dp, start = 16.dp, end = 0.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                // Optional pin/favourite badges above date
+                if (entry.isPinned || entry.isFavorite) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (entry.isPinned) {
                             Icon(
                                 Icons.Filled.PushPin,
-                                contentDescription = "Pinned",
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onSurface
+                                contentDescription = null,
+                                modifier = Modifier.size(10.dp),
+                                tint = PinAmber
                             )
                         }
                         if (entry.isFavorite) {
                             Icon(
                                 Icons.Filled.Favorite,
-                                contentDescription = "Favorite",
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                        Text(
-                            text = entry.mood.icon,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = entry.mood.label,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
-                        if (entry.voiceNotes.isNotEmpty()) {
-                            Icon(
-                                Icons.Outlined.Mic,
-                                contentDescription = "Has voice notes",
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                contentDescription = null,
+                                modifier = Modifier.size(10.dp),
+                                tint = AccentRust
                             )
                         }
                     }
-                    Text(
-                        text = entry.createdAt.format(DateTimeFormatter.ofPattern("h:mm a")),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                    )
+                    Spacer(Modifier.height(4.dp))
                 }
-                if (entry.tags.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        entry.tags.take(3).forEach { tag ->
-                            Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = MaterialTheme.colorScheme.secondaryContainer
+                Text(
+                    text = dayStr,
+                    fontSize = 28.sp,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    letterSpacing = (-0.5).sp,
+                    color = DateInk,
+                    lineHeight = 28.sp
+                )
+                Text(
+                    text = monStr,
+                    fontSize = 10.sp,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.ExtraBold,
+                    letterSpacing = 1.5.sp,
+                    color = MuteInk,
+                    lineHeight = 14.sp
+                )
+            }
+
+            // ── DIVIDER ───────────────────────────────────────────
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp, vertical = 16.dp)
+                    .width(1.dp)
+                    .fillMaxHeight()
+                    .background(CardBorder)
+            )
+
+            // ── CONTENT ───────────────────────────────────────────
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(top = 18.dp, bottom = 16.dp, end = 4.dp)
+            ) {
+                // Title (if exists)
+                if (entry.title.isNotEmpty()) {
+                    Text(
+                        text = entry.title,
+                        style = androidx.compose.ui.text.TextStyle(
+                            fontFamily = androidx.compose.ui.text.font.FontFamily.Serif,
+                            fontSize = 17.sp,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                            color = BodyInk,
+                            lineHeight = 22.sp
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                     )
+                    Spacer(Modifier.height(6.dp))
+                }
+
+                // Excerpt
+                Text(
+                    text = entry.content,
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontFamily = androidx.compose.ui.text.font.FontFamily.Serif,
+                        fontSize = 14.sp,
+                        lineHeight = 21.sp,
+                        color = BodyInk.copy(alpha = 0.65f)
+                    ),
+                    maxLines = if (entry.title.isEmpty()) 3 else 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                // Any photos strip
+                if (entry.photos.isNotEmpty()) {
+                    Spacer(Modifier.height(10.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        entry.photos.take(3).forEach { photoUri ->
+                            coil.compose.AsyncImage(
+                                model = if (photoUri.startsWith("/")) java.io.File(photoUri) else android.net.Uri.parse(photoUri),
+                                contentDescription = null,
+                                modifier = Modifier.size(48.dp).clip(RoundedCornerShape(7.dp)),
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                            )
+                        }
+                        if (entry.photos.size > 3) {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(7.dp))
+                                    .background(CardBorder),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = "#$tag",
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
+                                Text("+${entry.photos.size - 3}", fontSize = 13.sp, color = MuteInk)
                             }
                         }
-                        if (entry.tags.size > 3) {
-                            Text(
-                                text = "+${entry.tags.size - 3}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            )
+                    }
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                // ── Meta strip ──────────────────────────────────────────
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Mood + time + word count
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(entry.mood.icon, fontSize = 14.sp)
+                        Box(Modifier.size(3.dp).background(MuteInk.copy(alpha = 0.4f), CircleShape))
+                        Text(timeStr, fontSize = 11.sp, color = MuteInk, letterSpacing = 0.3.sp)
+                        Box(Modifier.size(3.dp).background(MuteInk.copy(alpha = 0.4f), CircleShape))
+                        Text("${entry.wordCount}w", fontSize = 11.sp, color = MuteInk)
+                        if (entry.voiceNotes.isNotEmpty()) {
+                            Icon(Icons.Outlined.Mic, contentDescription = null, modifier = Modifier.size(12.dp), tint = MuteInk)
                         }
                     }
+                    // Tags (first one)
+                    if (entry.tags.isNotEmpty()) {
+                        Text(
+                            "#${entry.tags.first()}${if (entry.tags.size > 1) " +${entry.tags.size - 1}" else ""}",
+                            fontSize = 11.sp,
+                            color = AccentRust.copy(alpha = 0.7f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+
+            // ── MENU ──────────────────────────────────────────────────────
+            Box(modifier = Modifier.padding(top = 8.dp, end = 4.dp)) {
+                IconButton(onClick = { showMenu = true }, modifier = Modifier.size(36.dp)) {
+                    Icon(Icons.Outlined.MoreVert, contentDescription = "More options", tint = MuteInk, modifier = Modifier.size(18.dp))
+                }
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false },
+                    modifier = Modifier.background(CardBg)
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(if (entry.isFavorite) "Remove from Favorites" else "Add to Favorites", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                        onClick = { onFavoriteClick(); showMenu = false },
+                        leadingIcon = { Icon(if (entry.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder, null, tint = MaterialTheme.colorScheme.onSurface) }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(if (entry.isPinned) "Unpin" else "Pin to Top", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                        onClick = { onPinClick(); showMenu = false },
+                        leadingIcon = { Icon(if (entry.isPinned) Icons.Filled.PushPin else Icons.Outlined.PushPin, null, tint = MaterialTheme.colorScheme.onSurface) }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Archive", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                        onClick = { onArchiveClick(); showMenu = false },
+                        leadingIcon = { Icon(Icons.Outlined.Archive, null, tint = MaterialTheme.colorScheme.onSurface) }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Duplicate", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                        onClick = { onDuplicateClick(); showMenu = false },
+                        leadingIcon = { Icon(Icons.Outlined.ContentCopy, null, tint = MaterialTheme.colorScheme.onSurface) }
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+                    DropdownMenuItem(
+                        text = { Text("Delete", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface) },
+                        onClick = { showMenu = false; showDeleteDialog = true },
+                        leadingIcon = { Icon(Icons.Outlined.Delete, null, tint = MaterialTheme.colorScheme.onSurface) }
+                    )
                 }
             }
         }
@@ -1055,7 +1054,7 @@ fun JournalEntryCard(
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Delete")
+                    Text("Delete", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             dismissButton = {
@@ -1065,7 +1064,7 @@ fun JournalEntryCard(
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Cancel")
+                    Text("Cancel", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -1112,7 +1111,7 @@ fun FilterBottomSheet(
                                 onClick = {
                                     viewModel.selectedMoodFilter = if (viewModel.selectedMoodFilter == mood) null else mood
                                 },
-                                label = { Text("${mood.icon} ${mood.label}") },
+                                label = { Text("${mood.icon} ${mood.label}", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 modifier = Modifier.weight(1f),
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = MaterialTheme.colorScheme.onSurface,
@@ -1176,7 +1175,7 @@ fun FilterBottomSheet(
                     contentColor = MaterialTheme.colorScheme.onSurface
                 )
             ) {
-                Text("Clear Filters")
+                Text("Clear Filters", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
             Spacer(modifier = Modifier.height(40.dp))
         }

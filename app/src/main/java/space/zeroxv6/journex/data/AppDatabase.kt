@@ -5,7 +5,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 @Database(
     entities = [TodoEntity::class, ScheduleEntity::class, ReminderEntity::class, PromptEntity::class, SettingsEntity::class, JournalEntity::class, NoteEntity::class, NoteFolderEntity::class, ProjectTaskEntity::class, TaskProjectEntity::class, QuickNoteEntity::class],
-    version = 8,
+    version = 11,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -24,11 +24,18 @@ abstract class AppDatabase : RoomDatabase() {
         private var INSTANCE: AppDatabase? = null
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
+                val MIGRATION_10_11 = object : androidx.room.migration.Migration(10, 11) {
+                    override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                        database.execSQL("ALTER TABLE settings ADD COLUMN useFullScreenAlarm INTEGER NOT NULL DEFAULT 1")
+                    }
+                }
+                
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "journal_database"
                 )
+                .addMigrations(MIGRATION_10_11)
                 .fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance

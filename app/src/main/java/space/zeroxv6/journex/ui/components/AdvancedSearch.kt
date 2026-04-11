@@ -64,7 +64,7 @@ fun AdvancedSearchDialog(
                             dateRange = null
                         }
                     ) {
-                        Text("Clear All")
+                        Text("Clear All", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     }
                 }
             }
@@ -80,7 +80,7 @@ fun AdvancedSearchDialog(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Search in title and content...") },
+                        placeholder = { Text("Search in title and content...", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         leadingIcon = {
                             Icon(Icons.Filled.Search, contentDescription = null)
                         },
@@ -122,7 +122,7 @@ fun AdvancedSearchDialog(
                                         selectedCategories + category
                                     }
                                 },
-                                label = { Text(category.label) }
+                                label = { Text(category.label, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) }
                             )
                         }
                     }
@@ -150,7 +150,7 @@ fun AdvancedSearchDialog(
                                             selectedTags + tag
                                         }
                                     },
-                                    label = { Text("#$tag") }
+                                    label = { Text("#$tag", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) }
                                 )
                             }
                         }
@@ -178,7 +178,7 @@ fun AdvancedSearchDialog(
                                         selectedPriorities + priority
                                     }
                                 },
-                                label = { Text(priority.label) },
+                                label = { Text(priority.label, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = try {
                                         androidx.compose.ui.graphics.Color(
@@ -214,7 +214,7 @@ fun AdvancedSearchDialog(
                                     false -> null
                                 }
                             },
-                            label = { Text("Has Attachments") },
+                            label = { Text("Has Attachments", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             leadingIcon = {
                                 Icon(
                                     Icons.Filled.AttachFile,
@@ -232,7 +232,7 @@ fun AdvancedSearchDialog(
                                     false -> null
                                 }
                             },
-                            label = { Text("Has Reminders") },
+                            label = { Text("Has Reminders", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                             leadingIcon = {
                                 Icon(
                                     Icons.Filled.Notifications,
@@ -252,7 +252,7 @@ fun AdvancedSearchDialog(
                                 false -> null
                             }
                         },
-                        label = { Text("Locked Notes") },
+                        label = { Text("Locked Notes", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         leadingIcon = {
                             Icon(
                                 Icons.Filled.Lock,
@@ -290,7 +290,7 @@ fun AdvancedSearchDialog(
                             onClick = { dateRange = null },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Clear Date Range")
+                            Text("Clear Date Range", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                         }
                     }
                 }
@@ -316,7 +316,7 @@ fun AdvancedSearchDialog(
                 ) {
                     Icon(Icons.Filled.Search, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Apply Filters")
+                    Text("Apply Filters", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             }
             item {

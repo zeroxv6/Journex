@@ -4,10 +4,13 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
@@ -23,14 +26,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import space.zeroxv6.journex.model.ScheduleItem
 import space.zeroxv6.journex.ui.animations.bounceClick
+import space.zeroxv6.journex.ui.theme.FeatureColors
 import space.zeroxv6.journex.ui.utils.HapticFeedback
 import java.time.DayOfWeek
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ScheduleScreen(
     taskViewModel: space.zeroxv6.journex.viewmodel.TaskViewModel,
+    viewModel: space.zeroxv6.journex.viewmodel.JournalViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToDashboard: () -> Unit = {},
     onNavigateToJournal: () -> Unit = {},
@@ -38,6 +43,7 @@ fun ScheduleScreen(
     onNavigateToReminders: () -> Unit = {}
 ) {
     val scheduleItems by taskViewModel.allSchedules.collectAsState()
+    val use24Hour = viewModel.use24HourFormat
     var showAddDialog by remember { mutableStateOf(false) }
     var titleInput by remember { mutableStateOf("") }
     var descriptionInput by remember { mutableStateOf("") }
@@ -64,7 +70,8 @@ fun ScheduleScreen(
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface
-                    )
+                    ),
+                    windowInsets = WindowInsets(0, 0, 0, 0)
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
             }
@@ -93,8 +100,8 @@ fun ScheduleScreen(
                     HapticFeedback.perform(context, HapticFeedback.FeedbackType.MEDIUM)
                     showAddDialog = true 
                 },
-                containerColor = MaterialTheme.colorScheme.onSurface,
-                contentColor = MaterialTheme.colorScheme.surface,
+                containerColor = FeatureColors.ScheduleAccentDark,
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .scale(scale)
@@ -111,7 +118,7 @@ fun ScheduleScreen(
             ) {
                 Icon(Icons.Filled.Add, contentDescription = "Add Schedule")
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Add Schedule")
+                Text("Add Schedule", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
         }
     ) { padding ->
@@ -184,11 +191,16 @@ fun ScheduleScreen(
                 ) 
             },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                     TextField(
                         value = titleInput,
                         onValueChange = { titleInput = it },
-                        placeholder = { Text("Schedule name") },
+                        placeholder = { Text("Schedule name", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         singleLine = true,
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -201,7 +213,7 @@ fun ScheduleScreen(
                     TextField(
                         value = descriptionInput,
                         onValueChange = { descriptionInput = it },
-                        placeholder = { Text("Description (optional)") },
+                        placeholder = { Text("Description (optional)", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         singleLine = true,
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -216,68 +228,13 @@ fun ScheduleScreen(
                             text = "Start Time",
                             style = MaterialTheme.typography.labelMedium
                         )
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(12.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    IconButton(
-                                        onClick = { selectedStartHour = (selectedStartHour - 1 + 24) % 24 },
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Icon(Icons.Filled.Remove, contentDescription = "Decrease hour")
-                                    }
-                                    Text(
-                                        text = String.format("%02d", selectedStartHour),
-                                        style = MaterialTheme.typography.titleLarge
-                                    )
-                                    IconButton(
-                                        onClick = { selectedStartHour = (selectedStartHour + 1) % 24 },
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Icon(Icons.Filled.Add, contentDescription = "Increase hour")
-                                    }
-                                }
-                            }
-                            Text(":", style = MaterialTheme.typography.titleLarge)
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(12.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    IconButton(
-                                        onClick = { selectedStartMinute = (selectedStartMinute - 15 + 60) % 60 },
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Icon(Icons.Filled.Remove, contentDescription = "Decrease minute")
-                                    }
-                                    Text(
-                                        text = String.format("%02d", selectedStartMinute),
-                                        style = MaterialTheme.typography.titleLarge
-                                    )
-                                    IconButton(
-                                        onClick = { selectedStartMinute = (selectedStartMinute + 15) % 60 },
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Icon(Icons.Filled.Add, contentDescription = "Increase minute")
-                                    }
-                                }
-                            }
-                        }
+                        space.zeroxv6.journex.ui.components.ImprovedTimePicker(
+                            hour = selectedStartHour,
+                            minute = selectedStartMinute,
+                            use24Hour = use24Hour,
+                            onHourChange = { selectedStartHour = it },
+                            onMinuteChange = { selectedStartMinute = it }
+                        )
                     }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -298,68 +255,13 @@ fun ScheduleScreen(
                         )
                     }
                     if (hasEndTime) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(12.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    IconButton(
-                                        onClick = { selectedEndHour = (selectedEndHour - 1 + 24) % 24 },
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Icon(Icons.Filled.Remove, contentDescription = "Decrease hour")
-                                    }
-                                    Text(
-                                        text = String.format("%02d", selectedEndHour),
-                                        style = MaterialTheme.typography.titleLarge
-                                    )
-                                    IconButton(
-                                        onClick = { selectedEndHour = (selectedEndHour + 1) % 24 },
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Icon(Icons.Filled.Add, contentDescription = "Increase hour")
-                                    }
-                                }
-                            }
-                            Text(":", style = MaterialTheme.typography.titleLarge)
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(12.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    IconButton(
-                                        onClick = { selectedEndMinute = (selectedEndMinute - 15 + 60) % 60 },
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Icon(Icons.Filled.Remove, contentDescription = "Decrease minute")
-                                    }
-                                    Text(
-                                        text = String.format("%02d", selectedEndMinute),
-                                        style = MaterialTheme.typography.titleLarge
-                                    )
-                                    IconButton(
-                                        onClick = { selectedEndMinute = (selectedEndMinute + 15) % 60 },
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Icon(Icons.Filled.Add, contentDescription = "Increase minute")
-                                    }
-                                }
-                            }
-                        }
+                        space.zeroxv6.journex.ui.components.ImprovedTimePicker(
+                            hour = selectedEndHour,
+                            minute = selectedEndMinute,
+                            use24Hour = use24Hour,
+                            onHourChange = { selectedEndHour = it },
+                            onMinuteChange = { selectedEndMinute = it }
+                        )
                     }
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(
@@ -387,37 +289,55 @@ fun ScheduleScreen(
                             }
                         }
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            listOf(
-                                listOf(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY),
-                                listOf(DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY),
-                                listOf(DayOfWeek.SUNDAY)
-                            ).forEach { dayRow ->
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    dayRow.forEach { day ->
-                                        FilterChip(
-                                            selected = selectedDays.contains(day),
-                                            onClick = {
-                                                selectedDays = if (selectedDays.contains(day)) {
-                                                    selectedDays - day
-                                                } else {
-                                                    selectedDays + day
-                                                }
-                                            },
-                                            label = { Text(day.name.take(3)) },
-                                            modifier = Modifier.weight(1f),
-                                            colors = FilterChipDefaults.filterChipColors(
-                                                selectedContainerColor = MaterialTheme.colorScheme.onSurface,
-                                                selectedLabelColor = MaterialTheme.colorScheme.surface
-                                            )
+                            Text("Days of Week", style = MaterialTheme.typography.labelMedium)
+                            // First row: Mon, Tue, Wed, Thu
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                listOf(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY).forEach { day ->
+                                    FilterChip(
+                                        selected = selectedDays.contains(day),
+                                        onClick = {
+                                            selectedDays = if (selectedDays.contains(day)) {
+                                                selectedDays - day
+                                            } else {
+                                                selectedDays + day
+                                            }
+                                        },
+                                        label = { Text(day.name.take(3), maxLines = 1) },
+                                        modifier = Modifier.weight(1f),
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = MaterialTheme.colorScheme.onSurface,
+                                            selectedLabelColor = MaterialTheme.colorScheme.surface
                                         )
-                                    }
-                                    repeat(3 - dayRow.size) {
-                                        Spacer(modifier = Modifier.weight(1f))
-                                    }
+                                    )
                                 }
+                            }
+                            // Second row: Fri, Sat, Sun
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                listOf(DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).forEach { day ->
+                                    FilterChip(
+                                        selected = selectedDays.contains(day),
+                                        onClick = {
+                                            selectedDays = if (selectedDays.contains(day)) {
+                                                selectedDays - day
+                                            } else {
+                                                selectedDays + day
+                                            }
+                                        },
+                                        label = { Text(day.name.take(3), maxLines = 1) },
+                                        modifier = Modifier.weight(1f),
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = MaterialTheme.colorScheme.onSurface,
+                                            selectedLabelColor = MaterialTheme.colorScheme.surface
+                                        )
+                                    )
+                                }
+                                Spacer(modifier = Modifier.weight(1f))
                             }
                         }
                     }
@@ -451,7 +371,7 @@ fun ScheduleScreen(
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Add")
+                    Text("Add", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             dismissButton = {
@@ -471,7 +391,7 @@ fun ScheduleScreen(
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Cancel")
+                    Text("Cancel", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -557,14 +477,16 @@ fun ScheduleCard(
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                Row(
+                // Use FlowRow to wrap days to next line if needed
+                FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    item.daysOfWeek.sortedBy { it.value }.take(7).forEach { day ->
+                    item.daysOfWeek.sortedBy { it.value }.forEach { day ->
                         Surface(
                             shape = RoundedCornerShape(6.dp),
-                            color = if (item.isEnabled) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.outline
+                            color = if (item.isEnabled) FeatureColors.ScheduleAccent else MaterialTheme.colorScheme.outline
                         ) {
                             Text(
                                 text = day.name.take(3),
@@ -604,16 +526,29 @@ fun ScheduleCard(
                     DropdownMenu(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false },
-                        modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                        modifier = Modifier.background(Color(0xFFFFFEFC))
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Delete", style = MaterialTheme.typography.bodyMedium) },
+                            text = {
+                                Text(
+                                    "Delete",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color(0xFF3A3530),
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                )
+                            },
                             onClick = {
                                 onDelete()
                                 showMenu = false
                             },
                             leadingIcon = {
-                                Icon(Icons.Outlined.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+                                Icon(
+                                    Icons.Outlined.Delete,
+                                    contentDescription = null,
+                                    tint = Color(0xFFD94F2A),
+                                    modifier = Modifier.size(18.dp)
+                                )
                             }
                         )
                     }

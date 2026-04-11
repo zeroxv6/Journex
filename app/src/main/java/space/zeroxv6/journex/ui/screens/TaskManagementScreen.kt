@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import space.zeroxv6.journex.model.*
 import space.zeroxv6.journex.ui.components.AddTaskDialog
+import space.zeroxv6.journex.ui.theme.FeatureColors
+import space.zeroxv6.journex.ui.theme.GeistFontFamily
 import space.zeroxv6.journex.ui.components.TaskDetailDialog
 import space.zeroxv6.journex.viewmodel.ProjectTaskViewModel
 import space.zeroxv6.journex.viewmodel.TaskFilter
@@ -68,14 +70,15 @@ fun TaskManagementScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+                ),
+                windowInsets = WindowInsets(0, 0, 0, 0)
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddDialog = true },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
+                containerColor = FeatureColors.TaskManagementAccentDark,
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Icon(Icons.Default.Add, "Add Task")
@@ -176,7 +179,7 @@ fun SearchAndFilterBar(
             value = searchQuery,
             onValueChange = onSearchChange,
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Search tasks...", fontSize = 14.sp) },
+            placeholder = { Text("Search tasks...", fontSize = 14.sp, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, fontFamily = GeistFontFamily) },
             leadingIcon = {
                 Icon(
                     Icons.Default.Search,

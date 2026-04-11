@@ -41,7 +41,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
             entities.map { it.toScheduleItem() }.filter { it.daysOfWeek.contains(today) }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-    val activeReminders: StateFlow<List<Reminder>> = reminderRepository.getActiveReminders()
+    val activeReminders: StateFlow<List<Reminder>> = reminderRepository.getAllReminders()
         .map { entities -> entities.map { it.toReminder() } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     val upcomingReminders: StateFlow<List<Reminder>> = reminderRepository.getUpcomingReminders(10)
@@ -201,7 +201,8 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                     reminderId.hashCode(),
                     title,
                     description,
-                    timeInMillis
+                    timeInMillis,
+                    repeatType.name
                 )
             }
         }
@@ -217,7 +218,8 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                         reminder.id.hashCode(),
                         reminder.title,
                         reminder.description,
-                        timeInMillis
+                        timeInMillis,
+                        reminder.repeatType.name
                     )
                 }
             } else {

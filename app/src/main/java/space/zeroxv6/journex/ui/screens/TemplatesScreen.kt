@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import space.zeroxv6.journex.model.Mood
 import space.zeroxv6.journex.ui.animations.bounceClick
+import space.zeroxv6.journex.ui.theme.FeatureColors
 import space.zeroxv6.journex.viewmodel.JournalViewModel
 data class JournalTemplate(
     val id: String,
@@ -190,7 +191,8 @@ fun TemplatesScreen(
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface
-                    )
+                    ),
+                    windowInsets = WindowInsets(0, 0, 0, 0)
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
             }
@@ -287,7 +289,7 @@ fun TemplatesScreen(
                     TextField(
                         value = titleInput,
                         onValueChange = { titleInput = it },
-                        placeholder = { Text("Template title") },
+                        placeholder = { Text("Template title", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         singleLine = true,
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -300,7 +302,7 @@ fun TemplatesScreen(
                     TextField(
                         value = descriptionInput,
                         onValueChange = { descriptionInput = it },
-                        placeholder = { Text("Description") },
+                        placeholder = { Text("Description", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         singleLine = true,
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -313,7 +315,7 @@ fun TemplatesScreen(
                     TextField(
                         value = categoryInput,
                         onValueChange = { categoryInput = it },
-                        placeholder = { Text("Category") },
+                        placeholder = { Text("Category", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         singleLine = true,
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -326,7 +328,7 @@ fun TemplatesScreen(
                     TextField(
                         value = contentInput,
                         onValueChange = { contentInput = it },
-                        placeholder = { Text("Template content...") },
+                        placeholder = { Text("Template content...", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         modifier = Modifier.height(200.dp),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -359,7 +361,7 @@ fun TemplatesScreen(
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Create")
+                    Text("Create", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             dismissButton = {
@@ -369,7 +371,7 @@ fun TemplatesScreen(
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Cancel")
+                    Text("Cancel", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -423,7 +425,7 @@ fun TemplateCard(
             Spacer(modifier = Modifier.height(12.dp))
             Surface(
                 shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer
+                color = FeatureColors.TemplatesAccent
             ) {
                 Text(
                     text = template.category,

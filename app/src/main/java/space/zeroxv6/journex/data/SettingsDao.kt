@@ -21,4 +21,13 @@ interface SettingsDao {
     suspend fun updateJournalReminderTime(hour: Int, minute: Int)
     @Query("UPDATE settings SET quickNoteNotificationEnabled = :enabled WHERE id = 1")
     suspend fun updateQuickNoteNotificationEnabled(enabled: Boolean)
+    
+    @Query("UPDATE settings SET use24HourFormat = :enabled WHERE id = 1")
+    suspend fun updateUse24HourFormat(enabled: Boolean)
+    
+    @Query("UPDATE settings SET persistentScheduleNotificationEnabled = :enabled WHERE id = 1")
+    suspend fun updatePersistentScheduleNotificationEnabled(enabled: Boolean)
+    
+    @Query("UPDATE settings SET useFullScreenAlarm = :enabled WHERE id = 1")
+    suspend fun updateUseFullScreenAlarm(enabled: Boolean)
 }

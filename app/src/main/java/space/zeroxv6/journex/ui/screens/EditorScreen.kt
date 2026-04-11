@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +34,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -73,10 +75,6 @@ fun EditorScreen(
             Column {
                 TopAppBar(
                     title = {
-                        Text(
-                            text = entry.createdAt.format(DateTimeFormatter.ofPattern("EEEE, MMMM dd")),
-                            style = MaterialTheme.typography.titleMedium
-                        )
                     },
                     navigationIcon = {
                         IconButton(onClick = {
@@ -90,6 +88,7 @@ fun EditorScreen(
                         }
                     },
                     actions = {
+                        val context = androidx.compose.ui.platform.LocalContext.current
                         var showExportMenu by remember { mutableStateOf(false) }
                         Text(
                             text = "${entry.wordCount} words",
@@ -106,9 +105,30 @@ fun EditorScreen(
                                 onDismissRequest = { showExportMenu = false }
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Export as Text") },
+                                    text = { Text("Export as Text", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                                     onClick = {
                                         showExportMenu = false
+                                        val exportText = "Title: ${entry.title}\nDate: ${entry.createdAt.format(java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy"))}\n\n${entry.content}"
+                                        val file = space.zeroxv6.journex.utils.ExportUtils.saveToFile(
+                                            context,
+                                            exportText,
+                                            "Journal_Entry_${System.currentTimeMillis()}.txt"
+                                        )
+                                        val uri = androidx.core.content.FileProvider.getUriForFile(
+                                            context,
+                                            "${context.packageName}.fileprovider",
+                                            file
+                                        )
+                                        val shareIntent = android.content.Intent().apply {
+                                            action = android.content.Intent.ACTION_SEND
+                                            type = "text/plain"
+                                            putExtra(android.content.Intent.EXTRA_TITLE, entry.title)
+                                            putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                                            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        }
+                                        context.startActivity(
+                                            android.content.Intent.createChooser(shareIntent, "Export Journal Entry")
+                                        )
                                     },
                                     leadingIcon = {
                                         Icon(Icons.Outlined.TextSnippet, contentDescription = null)
@@ -126,12 +146,16 @@ fun EditorScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    )
+                        containerColor = Color.Transparent,
+                        titleContentColor = Color(0xFF2C2825),
+                        navigationIconContentColor = Color(0xFF2C2825),
+                        actionIconContentColor = Color(0xFF2C2825)
+                    ),
+                    windowInsets = WindowInsets(0, 0, 0, 0)
                 )
-                HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
             }
-        }
+        },
+        containerColor = Color(0xFFF7F4EF)
     ) { padding ->
         Column(
             modifier = Modifier
@@ -139,127 +163,167 @@ fun EditorScreen(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
-            ) {
-                TextField(
+            val editorialDate = entry.createdAt.format(DateTimeFormatter.ofPattern("MMM dd, yyyy")).uppercase()
+            val editorialDay = entry.createdAt.format(DateTimeFormatter.ofPattern("EEEE")).uppercase()
+            
+            Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {
+                // Editorial Date
+                Text(
+                    text = "$editorialDay   ·   $editorialDate",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 2.sp,
+                    color = Color(0xFFD94F2A),
+                    fontFamily = space.zeroxv6.journex.ui.theme.GeistFontFamily
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                // Title Field
+                androidx.compose.foundation.text.BasicTextField(
                     value = entry.title,
                     onValueChange = { viewModel.updateCurrentEntry(entry.copy(title = it)) },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = {
-                        Text(
-                            "Title",
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-                    },
-                    textStyle = MaterialTheme.typography.headlineSmall,
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
+                    textStyle = androidx.compose.ui.text.TextStyle(
+                        fontFamily = androidx.compose.ui.text.font.FontFamily.Serif,
+                        fontSize = 42.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF2C2825),
+                        lineHeight = 46.sp
                     ),
-                    singleLine = true
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
-            ) {
-                TextField(
-                    value = entry.content,
-                    onValueChange = { viewModel.updateCurrentEntry(entry.copy(content = it)) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .defaultMinSize(minHeight = 300.dp),
-                    placeholder = {
-                        Text(
-                            "Write your thoughts...",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(
-                        lineHeight = MaterialTheme.typography.bodyLarge.lineHeight
-                    ),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    )
-                )
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-            ) {
-                Text(
-                    text = "Mood",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(Mood.entries.toList()) { mood ->
-                        MoodChip(
-                            mood = mood,
-                            isSelected = entry.mood == mood,
-                            onClick = { viewModel.updateCurrentEntry(entry.copy(mood = mood)) },
-                            modifier = Modifier
-                        )
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(32.dp))
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Tags",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    IconButton(onClick = { showTagInput = true }) {
-                        Icon(Icons.Filled.Add, contentDescription = "Add Tag")
-                    }
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                if (entry.tags.isNotEmpty()) {
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(entry.tags) { tag ->
-                            TagChip(
-                                tag = tag,
-                                onRemove = {
-                                    viewModel.updateCurrentEntry(
-                                        entry.copy(tags = entry.tags - tag)
-                                    )
-                                }
+                    cursorBrush = androidx.compose.ui.graphics.SolidColor(Color(0xFFD94F2A)),
+                    decorationBox = { innerTextField ->
+                        if (entry.title.isEmpty()) {
+                            Text(
+                                text = "Untitled",
+                                fontFamily = androidx.compose.ui.text.font.FontFamily.Serif,
+                                fontSize = 42.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color(0xFF2C2825).copy(alpha = 0.2f),
+                                lineHeight = 46.sp
                             )
                         }
+                        innerTextField()
                     }
-                } else {
+                )
+            }
+            
+            // Thin aesthetic divider
+            Box(modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth().height(1.dp).background(Color(0xFFE5DED4)))
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Content Field
+            androidx.compose.foundation.text.BasicTextField(
+                value = entry.content,
+                onValueChange = { viewModel.updateCurrentEntry(entry.copy(content = it)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 300.dp)
+                    .padding(horizontal = 24.dp),
+                textStyle = androidx.compose.ui.text.TextStyle(
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Serif,
+                    fontSize = 19.sp,
+                    lineHeight = 32.sp,
+                    color = Color(0xFF3A3630),
+                    letterSpacing = 0.2.sp
+                ),
+                cursorBrush = androidx.compose.ui.graphics.SolidColor(Color(0xFFD94F2A)),
+                decorationBox = { innerTextField ->
+                    if (entry.content.isEmpty()) {
+                        Text(
+                            text = "Begin your story...",
+                            fontFamily = androidx.compose.ui.text.font.FontFamily.Serif,
+                            fontSize = 19.sp,
+                            lineHeight = 32.sp,
+                            color = Color(0xFF3A3630).copy(alpha = 0.35f),
+                            letterSpacing = 0.2.sp
+                        )
+                    }
+                    innerTextField()
+                }
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(48.dp))
+            // MINIMAL METADATA ROW
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFFFFDF9))
+                    .border(1.dp, Color(0xFFE5DED4))
+                    .padding(vertical = 16.dp, horizontal = 24.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Mood Dropdown
+                Column {
                     Text(
-                        text = "No tags added",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        text = "VIBE",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp,
+                        color = Color(0xFF2C2825).copy(alpha = 0.5f),
+                        fontFamily = space.zeroxv6.journex.ui.theme.GeistFontFamily
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Box(modifier = Modifier.clickable { showMoodPicker = !showMoodPicker }) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(text = entry.mood.icon, fontSize = 20.sp)
+                            Text(text = entry.mood.label, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Color(0xFF2C2825))
+                            Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color(0xFF2C2825).copy(alpha = 0.5f))
+                        }
+                        DropdownMenu(
+                            expanded = showMoodPicker,
+                            onDismissRequest = { showMoodPicker = false },
+                            modifier = Modifier.background(Color(0xFFFFFDF9))
+                        ) {
+                            Mood.entries.forEach { mood ->
+                                DropdownMenuItem(
+                                    text = { Text("${mood.icon}  ${mood.label}", color = Color(0xFF2C2825)) },
+                                    onClick = { 
+                                        viewModel.updateCurrentEntry(entry.copy(mood = mood))
+                                        showMoodPicker = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                // Tags
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = "TAGS",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp,
+                        color = Color(0xFF2C2825).copy(alpha = 0.5f),
+                        fontFamily = space.zeroxv6.journex.ui.theme.GeistFontFamily
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    if (entry.tags.isNotEmpty()) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.clickable { showTagInput = true }
+                        ) {
+                            entry.tags.take(3).forEach { t ->
+                                Text(
+                                    "#$t",
+                                    fontSize = 13.sp,
+                                    color = Color(0xFFD94F2A),
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                            if (entry.tags.size > 3) {
+                                Text("+${entry.tags.size - 3}", fontSize = 13.sp, color = Color(0xFF2C2825).copy(alpha = 0.5f))
+                            }
+                        }
+                    } else {
+                        Text(
+                            text = "+ Add tags",
+                            fontSize = 13.sp,
+                            color = Color(0xFF2C2825).copy(alpha = 0.4f),
+                            modifier = Modifier.clickable { showTagInput = true }
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(32.dp))
@@ -366,8 +430,9 @@ fun EditorScreen(
                     .padding(horizontal = 24.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    containerColor = Color.Transparent
                 ),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE5DED4)),
                 elevation = CardDefaults.cardElevation(0.dp)
             ) {
                 Column(
@@ -378,9 +443,10 @@ fun EditorScreen(
                 ) {
                     Text(
                         text = "Entry Details",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color(0xFF2C2825)
                     )
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+                    HorizontalDivider(color = Color(0xFFE5DED4))
                     MetadataRow(
                         icon = Icons.Outlined.CalendarToday,
                         label = "Created",
@@ -429,24 +495,27 @@ fun EditorScreen(
             title = {
                 Text(
                     "Add Tag",
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge.copy(color = Color(0xFF2C2825))
                 )
             },
             text = {
                 TextField(
                     value = tagInput,
                     onValueChange = { tagInput = it },
-                    placeholder = { Text("Enter tag name") },
+                    placeholder = { Text("Enter tag name", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, color = Color(0xFF2C2825).copy(alpha = 0.5f)) },
                     singleLine = true,
+                    textStyle = androidx.compose.ui.text.TextStyle(color = Color(0xFF2C2825)),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        focusedIndicatorColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedIndicatorColor = Color.Transparent
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        cursorColor = Color(0xFF2C2825)
                     ),
                     shape = RoundedCornerShape(12.dp)
                 )
             },
+            containerColor = Color(0xFFF7F4EF),
             confirmButton = {
                 Button(
                     onClick = {
@@ -464,7 +533,7 @@ fun EditorScreen(
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Add")
+                    Text("Add", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             dismissButton = {
@@ -477,10 +546,9 @@ fun EditorScreen(
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Cancel")
+                    Text("Cancel", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
-            containerColor = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(16.dp)
         )
     }
@@ -490,16 +558,17 @@ fun EditorScreen(
             title = {
                 Text(
                     "Unsaved Changes",
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge.copy(color = Color(0xFF2C2825))
                 )
             },
             text = {
                 Text(
                     "You have unsaved changes. What would you like to do?",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color(0xFF2C2825).copy(alpha = 0.8f)
                 )
             },
+            containerColor = Color(0xFFF7F4EF),
             confirmButton = {
                 Button(
                     onClick = {
@@ -507,12 +576,12 @@ fun EditorScreen(
                         onNavigateBack()
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.onSurface,
-                        contentColor = MaterialTheme.colorScheme.surface
+                        containerColor = Color(0xFF2C2825),
+                        contentColor = Color.White
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Save & Exit")
+                    Text("Save & Exit", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             dismissButton = {
@@ -520,10 +589,10 @@ fun EditorScreen(
                     TextButton(
                         onClick = { showDiscardDialog = false },
                         colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            contentColor = Color(0xFF2C2825).copy(alpha = 0.6f)
                         )
                     ) {
-                        Text("Cancel")
+                        Text("Cancel", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     }
                     TextButton(
                         onClick = {
@@ -531,75 +600,15 @@ fun EditorScreen(
                             onNavigateBack()
                         },
                         colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.onSurface
+                            contentColor = Color(0xFFD94F2A)
                         )
                     ) {
-                        Text("Discard")
+                        Text("Discard", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     }
                 }
             },
-            containerColor = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(16.dp)
         )
-    }
-}
-@Composable
-fun MoodChip(
-    mood: Mood,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
-        color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surfaceVariant,
-        modifier = modifier
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = mood.icon,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                text = mood.label,
-                style = MaterialTheme.typography.bodySmall,
-                color = if (isSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onSurface
-            )
-        }
-    }
-}
-@Composable
-fun TagChip(
-    tag: String,
-    onRemove: () -> Unit
-) {
-    Surface(
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "#$tag",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Icon(
-                Icons.Filled.Close,
-                contentDescription = "Remove",
-                modifier = Modifier
-                    .size(16.dp)
-                    .clickable(onClick = onRemove),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
     }
 }
 @Composable
@@ -607,7 +616,8 @@ fun RecordingIndicator(duration: Long) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(12.dp))
+            .background(Color.Transparent, RoundedCornerShape(12.dp))
+            .border(1.dp, Color(0xFFE5DED4), RoundedCornerShape(12.dp))
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -625,13 +635,13 @@ fun RecordingIndicator(duration: Long) {
             Text(
                 text = "Recording...",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = Color(0xFF2C2825)
             )
         }
         Text(
             text = formatDuration(duration),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = Color(0xFF2C2825)
         )
     }
 }
@@ -661,8 +671,9 @@ fun VoiceNoteCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = Color.Transparent
         ),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE5DED4)),
         elevation = CardDefaults.cardElevation(0.dp)
     ) {
         Column(
@@ -683,12 +694,13 @@ fun VoiceNoteCard(
                     Column {
                         Text(
                             text = "Voice Note",
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color(0xFF2C2825)
                         )
                         Text(
                             text = formatDuration(voiceNote.duration),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            color = Color(0xFF2C2825).copy(alpha = 0.6f)
                         )
                     }
                 }
@@ -1078,7 +1090,7 @@ fun PhotosSection(
                         contentColor = MaterialTheme.colorScheme.onSurface
                     )
                 ) {
-                    Text("Close")
+                    Text("Close", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -1113,7 +1125,7 @@ fun PhotosSection(
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Remove")
+                    Text("Remove", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             dismissButton = {
@@ -1123,7 +1135,7 @@ fun PhotosSection(
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Cancel")
+                    Text("Cancel", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,

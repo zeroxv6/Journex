@@ -66,7 +66,7 @@ fun VoiceRecorderDialog(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Voice Recording")
+                Text("Voice Recording", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 Text(
                     text = formatDuration(recordingDuration),
                     style = MaterialTheme.typography.titleMedium,
@@ -239,7 +239,7 @@ fun VoiceRecorderDialog(
                 },
                 enabled = !isRecording && recordingDuration > 0
             ) {
-                Text("Save")
+                Text("Save", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
         },
         dismissButton = {
@@ -253,7 +253,7 @@ fun VoiceRecorderDialog(
                 outputFile?.delete()
                 onDismiss()
             }) {
-                Text("Cancel")
+                Text("Cancel", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
         },
         shape = RoundedCornerShape(24.dp)

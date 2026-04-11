@@ -13,20 +13,29 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import space.zeroxv6.journex.model.Priority
 import space.zeroxv6.journex.model.TodoTask
 import space.zeroxv6.journex.ui.animations.bounceClick
+import space.zeroxv6.journex.ui.theme.FeatureColors
 import space.zeroxv6.journex.ui.utils.HapticFeedback
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import androidx.compose.foundation.border
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.scaleIn
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TodoScreen(
@@ -42,7 +51,7 @@ fun TodoScreen(
     var taskInput by remember { mutableStateOf("") }
     var taskDescription by remember { mutableStateOf("") }
     var selectedPriority by remember { mutableStateOf(Priority.MEDIUM) }
-    var showCompleted by remember { mutableStateOf(true) }
+    var showCompleted by remember { mutableStateOf(false) }
     val activeTasks = tasks.filter { !it.isCompleted }
     val completedTasks = tasks.filter { it.isCompleted }
     Scaffold(
@@ -52,7 +61,9 @@ fun TodoScreen(
                     title = {
                         Text(
                             "Tasks",
-                            style = MaterialTheme.typography.headlineMedium
+                            style = MaterialTheme.typography.headlineMedium,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
                     },
                     navigationIcon = {
@@ -61,21 +72,23 @@ fun TodoScreen(
                         }
                     },
                     actions = {
-                        IconButton(onClick = { showCompleted = !showCompleted }) {
-                            Icon(
-                                if (showCompleted) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                                contentDescription = if (showCompleted) "Hide completed tasks" else "Show completed tasks"
-                            )
+                        OutlinedButton(
+                            onClick = { showCompleted = !showCompleted },
+                            shape = RoundedCornerShape(20.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha=0.5f)),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                containerColor = if (showCompleted) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface,
+                                contentColor = MaterialTheme.colorScheme.onSurface
+                            ),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp)
+                        ) {
+                            Text(if (showCompleted) "View Active" else "View Completed", style = MaterialTheme.typography.labelLarge)
                         }
-                        Text(
-                            text = if (showCompleted) "Hide" else "Show",
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface
-                    )
+                    ),
+                    windowInsets = WindowInsets(0, 0, 0, 0)
                 )
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp)
             }
@@ -103,8 +116,8 @@ fun TodoScreen(
                     HapticFeedback.perform(context, HapticFeedback.FeedbackType.MEDIUM)
                     showAddDialog = true 
                 },
-                containerColor = MaterialTheme.colorScheme.onSurface,
-                contentColor = MaterialTheme.colorScheme.surface,
+                containerColor = FeatureColors.TodoAccentDark,
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .scale(scale)
@@ -121,10 +134,13 @@ fun TodoScreen(
             ) {
                 Icon(Icons.Filled.Add, contentDescription = "Add Task")
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("New Task")
+                Text("New Task", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             }
         }
     ) { padding ->
+        val coroutineScope = rememberCoroutineScope()
+        var completingTasks by remember { mutableStateOf(setOf<String>()) }
+        
         if (tasks.isEmpty()) {
             Column(
                 modifier = Modifier
@@ -142,13 +158,17 @@ fun TodoScreen(
                 Spacer(modifier = Modifier.height(24.dp))
                 Text(
                     text = "No Tasks",
-                    style = MaterialTheme.typography.headlineSmall
+                    style = MaterialTheme.typography.headlineSmall,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Add your first task to get started",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    maxLines = 2,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
             }
         } else {
@@ -159,29 +179,63 @@ fun TodoScreen(
                 contentPadding = PaddingValues(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                if (activeTasks.isNotEmpty()) {
-                    item {
-                        Text(
-                            text = "Active (${activeTasks.size})",
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                if (!showCompleted) {
+                    if (activeTasks.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "Active (${activeTasks.size})",
+                                style = MaterialTheme.typography.titleMedium,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
+                        items(
+                            items = activeTasks.sortedByDescending { it.priority.ordinal },
+                            key = { it.id }
+                        ) { task ->
+                            AnimatedVisibility(
+                                visible = !completingTasks.contains(task.id),
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut(animationSpec = tween(500)) + shrinkVertically(animationSpec = tween(500, delayMillis = 400))
+                            ) {
+                                TaskCard(
+                                    task = task,
+                                    isCompleting = completingTasks.contains(task.id),
+                                    onToggleComplete = {
+                                        if (!task.isCompleted && !completingTasks.contains(task.id)) {
+                                            completingTasks = completingTasks + task.id
+                                            HapticFeedback.perform(context, HapticFeedback.FeedbackType.STRONG)
+                                            coroutineScope.launch {
+                                                kotlinx.coroutines.delay(800)
+                                                taskViewModel.toggleTodoCompletion(task)
+                                                completingTasks = completingTasks - task.id
+                                            }
+                                        } else {
+                                            taskViewModel.toggleTodoCompletion(task)
+                                        }
+                                    },
+                                    onDelete = {
+                                        taskViewModel.deleteTodo(task)
+                                    }
+                                )
+                            }
+                        }
                     }
-                    items(
-                        items = activeTasks.sortedByDescending { it.priority.ordinal },
-                        key = { it.id }
-                    ) { task ->
-                        AnimatedVisibility(
-                            visible = true,
-                            enter = fadeIn() + expandVertically(),
-                            exit = fadeOut() + shrinkVertically()
-                        ) {
+                } else {
+                    if (completedTasks.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "Completed (${completedTasks.size})",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            )
+                        }
+                        items(completedTasks, key = { it.id }) { task ->
                             TaskCard(
                                 task = task,
+                                isCompleting = false,
                                 onToggleComplete = {
                                     taskViewModel.toggleTodoCompletion(task)
-                                    if (!task.isCompleted) {
-                                        HapticFeedback.perform(context, HapticFeedback.FeedbackType.STRONG)
-                                    }
                                 },
                                 onDelete = {
                                     taskViewModel.deleteTodo(task)
@@ -190,43 +244,21 @@ fun TodoScreen(
                         }
                     }
                 }
-                if (showCompleted && completedTasks.isNotEmpty()) {
-                    item {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Completed (${completedTasks.size})",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
-                    }
-                    items(completedTasks) { task ->
-                        TaskCard(
-                            task = task,
-                            onToggleComplete = {
-                                taskViewModel.toggleTodoCompletion(task)
-                                if (!task.isCompleted) {
-                                    HapticFeedback.perform(context, HapticFeedback.FeedbackType.STRONG)
-                                }
-                            },
-                            onDelete = {
-                                taskViewModel.deleteTodo(task)
-                            }
-                        )
-                    }
-                }
                 item {
                     Spacer(modifier = Modifier.height(80.dp))
                 }
-            }
-        }
-    }
+            } // end LazyColumn
+        } // end Column
+    } // end Scaffold
     if (showAddDialog) {
         AlertDialog(
             onDismissRequest = { showAddDialog = false },
             title = { 
                 Text(
                     "New Task",
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 ) 
             },
             text = {
@@ -234,7 +266,7 @@ fun TodoScreen(
                     TextField(
                         value = taskInput,
                         onValueChange = { taskInput = it },
-                        placeholder = { Text("Task title") },
+                        placeholder = { Text("Task title", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         singleLine = true,
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -247,7 +279,7 @@ fun TodoScreen(
                     TextField(
                         value = taskDescription,
                         onValueChange = { taskDescription = it },
-                        placeholder = { Text("Description (optional)") },
+                        placeholder = { Text("Description (optional)", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                         modifier = Modifier.height(80.dp),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -265,11 +297,19 @@ fun TodoScreen(
                             FilterChip(
                                 selected = selectedPriority == priority,
                                 onClick = { selectedPriority = priority },
-                                label = { Text(priority.label) },
+                                label = {
+                                    Text(
+                                        priority.label,
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                },
                                 modifier = Modifier.weight(1f),
                                 colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.onSurface,
-                                    selectedLabelColor = MaterialTheme.colorScheme.surface
+                                    selectedContainerColor = Color(0xFF2C2825),
+                                    selectedLabelColor = Color.White
                                 )
                             )
                         }
@@ -292,12 +332,12 @@ fun TodoScreen(
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.onSurface,
-                        contentColor = MaterialTheme.colorScheme.surface
+                        containerColor = Color(0xFF2C2825),
+                        contentColor = Color.White
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Add")
+                    Text("Add", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             dismissButton = {
@@ -312,7 +352,7 @@ fun TodoScreen(
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
-                    Text("Cancel")
+                    Text("Cancel", maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -323,121 +363,272 @@ fun TodoScreen(
 @Composable
 fun TaskCard(
     task: TodoTask,
+    isCompleting: Boolean = false,
     onToggleComplete: () -> Unit,
     onDelete: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    val effectiveCompleted = task.isCompleted || isCompleting
     val alpha by animateFloatAsState(
-        targetValue = if (task.isCompleted) 0.6f else 1f,
-        animationSpec = tween(300),
-        label = "taskAlpha"
+        targetValue = if (effectiveCompleted) 0.3f else 1f,
+        animationSpec = tween(500), label = "taskAlpha"
     )
     val scale by animateFloatAsState(
-        targetValue = if (task.isCompleted) 0.98f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
+        targetValue = if (effectiveCompleted) 0.985f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
         label = "taskScale"
     )
-    Card(
+
+    val priorityLabel = when (task.priority) {
+        Priority.HIGH   -> "HIGH"
+        Priority.MEDIUM -> "MED"
+        Priority.LOW    -> "LOW"
+    }
+
+    val isOverdue = task.dueDate != null && task.dueDate < java.time.LocalDate.now()
+    val accentColor = when {
+        task.isCompleted -> Color(0xFF9A9892)
+        isOverdue        -> Color(0xFFC04040)
+        task.priority == Priority.HIGH   -> Color(0xFFD94F2A)
+        task.priority == Priority.MEDIUM -> Color(0xFFF0920A)
+        else             -> Color(0xFF4A9E72)
+    }
+
+    val cardBg = when {
+        task.isCompleted -> Color(0xFFF6F3EE)
+        isOverdue        -> Color(0xFFFFF9F9)
+        else             -> Color(0xFFF9FFFC)
+    }
+    val borderColor = when {
+        task.isCompleted -> Color(0xFFE0DAD2)
+        isOverdue        -> Color(0xFFEDCFCF)
+        else             -> Color(0xFFCCE8D9)
+    }
+
+    val hasTime = task.dueDate != null
+    var dayStr = ""
+    var monthStr = ""
+    var fullDateStr = ""
+    if (hasTime) {
+        val dt = task.dueDate!!
+        dayStr = String.format("%02d", dt.dayOfMonth)
+        monthStr = dt.format(java.time.format.DateTimeFormatter.ofPattern("MMM")).uppercase()
+        fullDateStr = dt.format(java.time.format.DateTimeFormatter.ofPattern("EEE, MMM d"))
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .animateContentSize(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessMedium
-                )
-            )
-            .graphicsLayer {
-                this.alpha = alpha
-                scaleX = scale
-                scaleY = scale
-            },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (task.isCompleted) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surfaceVariant
-        ),
-        elevation = CardDefaults.cardElevation(0.dp)
+            .animateContentSize(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
+            .graphicsLayer { this.alpha = alpha; scaleX = scale; scaleY = scale }
+            .clip(RoundedCornerShape(22.dp))
+            .background(cardBg, RoundedCornerShape(22.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(22.dp))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 20.dp, vertical = 18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-            Row(
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+            // ── LEFT HERO BLOCK (Time or Priority) ───────────────────────────
+            Column(
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+                modifier = Modifier.width(80.dp) // Fixed width to keep separator aligned
             ) {
-                Checkbox(
-                    checked = task.isCompleted,
-                    onCheckedChange = { onToggleComplete() },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = MaterialTheme.colorScheme.onSurface,
-                        uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                    )
-                )
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = task.title,
-                        style = MaterialTheme.typography.bodyLarge,
-                        textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null,
-                        color = if (task.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface
-                    )
-                    if (task.description.isNotEmpty()) {
+                // Top sub-label
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    if (hasTime) {
                         Text(
-                            text = task.description,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            text = monthStr,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.2.sp,
+                            color = accentColor.copy(alpha = 0.6f)
+                        )
+                        Text(text = "·", fontSize = 9.sp, color = accentColor.copy(alpha = 0.3f))
+                        Text(
+                            text = priorityLabel,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.2.sp,
+                            color = accentColor.copy(alpha = 0.6f)
                         )
                     }
-                    if (!task.isCompleted) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = MaterialTheme.colorScheme.secondaryContainer
-                        ) {
+                }
+                
+                if (hasTime) {
+                    Text(
+                        text = dayStr,
+                        fontSize = 42.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-1.5).sp,
+                        color = if (effectiveCompleted) Color(0xFFB0ABA5) else accentColor,
+                        lineHeight = 42.sp
+                    )
+                    // Date
+                    Text(
+                        text = fullDateStr,
+                        fontSize = 10.5.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = if (isOverdue && !task.isCompleted) Color(0xFFC04040) else accentColor.copy(alpha = 0.5f),
+                        letterSpacing = 0.2.sp
+                    )
+                } else {
+                    Text(
+                        text = priorityLabel,
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-1).sp,
+                        color = if (effectiveCompleted) Color(0xFFB0ABA5) else accentColor,
+                        lineHeight = 38.sp
+                    )
+                    Text(
+                        text = "PRIORITY",
+                        fontSize = 10.5.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = accentColor.copy(alpha = 0.5f),
+                        letterSpacing = 0.2.sp
+                    )
+                }
+                
+                if (isOverdue && !task.isCompleted) {
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Text(
+                        text = "OVERDUE",
+                        fontSize = 8.5.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.5.sp,
+                        color = Color(0xFFC04040).copy(alpha = 0.7f)
+                    )
+                }
+            }
+
+            // Thin separator
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(52.dp)
+                    .background(borderColor)
+            )
+
+            // ── RIGHT BLOCK (Title + Checkbox) ───────────────────────────────
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f).padding(end = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = task.title,
+                            fontSize = 15.5.sp,
+                            fontWeight = if (effectiveCompleted) FontWeight.Normal else FontWeight.SemiBold,
+                            fontFamily = androidx.compose.ui.text.font.FontFamily.Serif,
+                            color = if (effectiveCompleted) Color(0xFFADA9A4) else Color(0xFF1A1714),
+                            textDecoration = if (effectiveCompleted) TextDecoration.LineThrough else null,
+                            lineHeight = 22.sp,
+                            maxLines = 2,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
+                        if (task.description.isNotEmpty()) {
                             Text(
-                                text = task.priority.label,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = task.priority.color
+                                text = task.description,
+                                fontSize = 12.5.sp,
+                                color = Color(0xFFC2BAB2),
+                                maxLines = 1,
+                                lineHeight = 17.sp,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                             )
                         }
                     }
-                }
-            }
-            Box {
-                IconButton(
-                    onClick = { showMenu = true },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        Icons.Outlined.MoreVert,
-                        contentDescription = "More",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                    )
-                }
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false },
-                    modifier = Modifier.background(MaterialTheme.colorScheme.surface)
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Delete", style = MaterialTheme.typography.bodyMedium) },
-                        onClick = {
-                            onDelete()
-                            showMenu = false
-                        },
-                        leadingIcon = {
-                            Icon(Icons.Outlined.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+                    
+                    // Controls (Checkbox + Menu)
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box {
+                            Box(
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .offset(x = 8.dp, y = (-8).dp) // Shifted up/right slightly to sit in corner
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                                    ) { showMenu = true },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Icons.Outlined.MoreVert,
+                                    contentDescription = "More",
+                                    tint = if (effectiveCompleted) Color(0xFFC0BCB6) else Color(0xFFCEC8C1),
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = showMenu,
+                                onDismissRequest = { showMenu = false },
+                                modifier = Modifier.background(Color(0xFFFFFEFC))
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Delete", style = MaterialTheme.typography.bodyMedium, color = Color(0xFF3A3630)) },
+                                    onClick = { onDelete(); showMenu = false },
+                                    leadingIcon = {
+                                        Icon(Icons.Outlined.Delete, contentDescription = null, tint = Color(0xFFD94F2A), modifier = Modifier.size(28.dp))
+                                    }
+                                )
+                            }
                         }
-                    )
+                        
+                        // Animated Circular Checkbox
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(androidx.compose.foundation.shape.CircleShape)
+                                .background(
+                                    color = if (effectiveCompleted) accentColor.copy(alpha = 0.92f) else Color.Transparent,
+                                    shape = androidx.compose.foundation.shape.CircleShape
+                                )
+                                .border(
+                                    width = 1.5.dp,
+                                    color = if (effectiveCompleted) Color.Transparent else accentColor.copy(alpha = 0.5f),
+                                    shape = androidx.compose.foundation.shape.CircleShape
+                                )
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                                ) { onToggleComplete() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = effectiveCompleted,
+                                enter = androidx.compose.animation.scaleIn() + androidx.compose.animation.fadeIn(),
+                                exit = androidx.compose.animation.scaleOut() + androidx.compose.animation.fadeOut()
+                            ) {
+                                Icon(
+                                    Icons.Filled.Check,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(15.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
+

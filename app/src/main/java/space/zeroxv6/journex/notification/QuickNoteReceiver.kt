@@ -70,7 +70,7 @@ class QuickNoteReceiver : BroadcastReceiver() {
             .addRemoteInput(remoteInput)
             .build()
         val notification = androidx.core.app.NotificationCompat.Builder(context, QuickNoteNotificationService.CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification)
+            .setSmallIcon(R.drawable.journex)
             .setContentTitle("Quick Note")
             .setContentText("Tap 'Save Note' button below to add a note")
             .setPriority(androidx.core.app.NotificationCompat.PRIORITY_LOW)
@@ -78,6 +78,7 @@ class QuickNoteReceiver : BroadcastReceiver() {
             .addAction(saveAction)
             .setStyle(androidx.core.app.NotificationCompat.BigTextStyle()
                 .bigText("Tap the 'Save Note' button below, type your note in the text field, and send"))
+            .setColor(0xFFFFE8DC.toInt())
             .build()
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
         notificationManager.notify(QuickNoteNotificationService.NOTIFICATION_ID, notification)

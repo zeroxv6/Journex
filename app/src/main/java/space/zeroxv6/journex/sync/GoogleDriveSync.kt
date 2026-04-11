@@ -689,6 +689,8 @@ class GoogleDriveSync(
                 put("description", schedule.description)
                 put("timeHour", schedule.timeHour)
                 put("timeMinute", schedule.timeMinute)
+                put("endTimeHour", schedule.endTimeHour)
+                put("endTimeMinute", schedule.endTimeMinute)
                 put("daysOfWeek", schedule.daysOfWeek)
                 put("isEnabled", schedule.isEnabled)
             })
@@ -923,6 +925,8 @@ class GoogleDriveSync(
                     description = obj.optString("description", ""),
                     timeHour = obj.optInt("timeHour", 0),
                     timeMinute = obj.optInt("timeMinute", 0),
+                    endTimeHour = if (obj.has("endTimeHour") && !obj.isNull("endTimeHour")) obj.getInt("endTimeHour") else null,
+                    endTimeMinute = if (obj.has("endTimeMinute") && !obj.isNull("endTimeMinute")) obj.getInt("endTimeMinute") else null,
                     daysOfWeek = obj.optString("daysOfWeek", ""),
                     isEnabled = obj.optBoolean("isEnabled", true)
                 ))
